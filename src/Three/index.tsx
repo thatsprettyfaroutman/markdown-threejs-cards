@@ -1,7 +1,7 @@
-import { useRef } from 'react'
-import { NearestFilter } from 'three'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { EffectComposer, Noise, Vignette } from '@react-three/postprocessing'
+import { useEffect, useRef } from 'react'
+import { NearestFilter, PCFSoftShadowMap, PointLight } from 'three'
+import { Canvas } from '@react-three/fiber'
+import { EffectComposer, Noise } from '@react-three/postprocessing'
 
 import styled from 'styled-components'
 import chroma from 'chroma-js'
@@ -12,91 +12,14 @@ import {
   Billboard,
 } from '@react-three/drei'
 import { useControls } from 'leva'
+import { Card } from './components/Card'
 
 const StyledThree = styled.div`
   position: relative;
 `
 
-const textureConfig = (texture) => {
-  texture.minFilter = NearestFilter
-}
-
-const Card = ({ ...restProps }) => {
-  const [texture, specularColor, metal, roughness] = useTexture(
-    [
-      '/textures/diffuseStroke.png',
-      '/textures/specularColorStroke.png',
-      '/textures/metalStroke.png',
-      '/textures/roughnessStroke.png',
-    ],
-    textureConfig
-  )
-  const [backTexture, backSpecularColor, backMetal, backRoughness] = useTexture(
-    [
-      '/textures/backDiffuseStroke.png',
-      '/textures/backSpecularColorStroke.png',
-      '/textures/backMetalStroke.png',
-      '/textures/backRoughnessStroke.png',
-    ],
-    textureConfig
-  )
-
-  // This reference will give us direct access to the mesh
-  const mesh = useRef()
-  // Set up state for the hovered and active state
-  // const [hovered, setHover] = useState(false)
-  // const [active, setActive] = useState(false)
-  // Subscribe this component to the render-loop, rotate the mesh every frame
-  useFrame((state, delta) => {
-    if (!mesh.current) {
-      return
-    }
-
-    // @ts-ignore
-    // mesh.current.rotation.x += 0.01
-  })
-  // Return view, these are regular three.js elements expressed in JSX
-  return (
-    <mesh
-      {...restProps}
-      ref={mesh}
-      // scale={active ? 1.5 : 1}
-      // onClick={(event) => setActive(!active)}
-      // onPointerOver={(event) => setHover(true)}
-      // onPointerOut={(event) => setHover(false)}
-    >
-      <boxGeometry args={[1, 1.4, 0.005]} />
-
-      <meshPhysicalMaterial attach="material-0" color="#0D0E1A" specular={1} />
-      <meshPhysicalMaterial attach="material-1" color="#0D0E1A" specular={1} />
-      <meshPhysicalMaterial attach="material-2" color="#0D0E1A" specular={1} />
-      <meshPhysicalMaterial attach="material-3" color="#0D0E1A" specular={1} />
-      <meshPhysicalMaterial attach="material-4" color="#0D0E1A" specular={1} />
-      <meshPhysicalMaterial
-        attach="material-4"
-        map={texture}
-        roughness={0.5}
-        roughnessMap={roughness}
-        metalnessMap={metal}
-        specularColorMap={specularColor}
-        transparent
-      />
-      <meshPhysicalMaterial
-        attach="material-5"
-        map={backTexture}
-        roughness={0.5}
-        roughnessMap={backRoughness}
-        metalnessMap={backMetal}
-        specularColorMap={backSpecularColor}
-        transparent
-      />
-    </mesh>
-  )
-}
-
 const Glow = ({ color, ...restProps }) => {
   const alpha = useTexture('/textures/glow.png')
-
   return (
     // @ts-ignore
     <Billboard>
@@ -108,38 +31,79 @@ const Glow = ({ color, ...restProps }) => {
   )
 }
 
+const Light = ({ ...restProps }) => {
+  const ref = useRef<PointLight>()
+
+  useEffect(() => {
+    if (!ref.current || !restProps.castShadow) {
+      return
+    }
+
+    console.log(ref.current)
+    ref.current.shadow.mapSize.width = 1024 * 4
+    ref.current.shadow.mapSize.height = 1024 * 4
+  }, [restProps.castShadow])
+
+  return (
+    <pointLight ref={ref} {...restProps}>
+      <mesh>
+        <meshBasicMaterial color="#fff" />
+        <boxGeometry args={[1, 0.25, 0.25]} />
+      </mesh>
+    </pointLight>
+  )
+}
+
 export const Three = ({ bg, ...restProps }) => {
-  const { lightDistance } = useControls({
-    lightDistance: {
+  const { lightIntensity, lightX, lightZ } = useControls({
+    lightIntensity: {
+      value: 1,
+      min: 0.01,
+      max: 10,
+    },
+    lightX: {
+      value: 0,
+      min: -8,
+      max: 8,
+    },
+    lightZ: {
       value: -3.3,
       min: -8,
       max: 0,
-      step: 0.1,
     },
   })
 
   return (
     <StyledThree {...restProps}>
-      <Canvas style={{ height: '100vh' }}>
+      <Canvas style={{ height: '100vh' }} shadows={{ type: PCFSoftShadowMap }}>
         <OrbitControls enableZoom={false} enablePan={false} />
         {/* @ts-ignore */}
         <PerspectiveCamera makeDefault position={[0, 0, 4]} fov={30}>
-          <pointLight position={[0, 2, -lightDistance]}>
-            <mesh>
-              <meshBasicMaterial color="#fff" />
-              <boxGeometry args={[1, 1, 1]} />
-            </mesh>
-          </pointLight>
+          <Light
+            castShadow
+            position={[lightX, 2, -lightZ]}
+            intensity={lightIntensity}
+          />
+          <Light
+            position={[lightX - 1, 2, -lightZ]}
+            intensity={lightIntensity}
+          />
+          <Light
+            position={[lightX + 1, 2, -lightZ]}
+            intensity={lightIntensity}
+          />
         </PerspectiveCamera>
 
         <ambientLight />
         <Glow color={chroma(bg).brighten(0.5).css()} />
 
         <Card />
+        <Card position-z={-0.01 * 5} rotation-z={0.1 * 0.5} />
+        <Card position-z={-0.02 * 5} rotation-z={0.2 * 0.5} />
+        <Card position-z={-0.03 * 5} rotation-z={0.3 * 0.5} />
 
         <EffectComposer>
           <Noise opacity={0.02} />
-          {/* <Vignette eskil={false} offset={0.1} darkness={0.1} /> */}
         </EffectComposer>
       </Canvas>
     </StyledThree>
