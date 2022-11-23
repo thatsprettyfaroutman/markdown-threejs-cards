@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
-import { NearestFilter, PCFSoftShadowMap, PointLight } from 'three'
+import { PCFSoftShadowMap, PointLight } from 'three'
 import { Canvas } from '@react-three/fiber'
 import { EffectComposer, Noise } from '@react-three/postprocessing'
-
+import { range } from 'ramda'
 import styled from 'styled-components'
 import chroma from 'chroma-js'
 import {
@@ -39,25 +39,37 @@ const Light = ({ ...restProps }) => {
       return
     }
 
-    console.log(ref.current)
     ref.current.shadow.mapSize.width = 1024 * 4
     ref.current.shadow.mapSize.height = 1024 * 4
   }, [restProps.castShadow])
 
   return (
-    <pointLight ref={ref} {...restProps}>
-      <mesh>
-        <meshBasicMaterial color="#fff" />
-        <boxGeometry args={[1, 0.25, 0.25]} />
-      </mesh>
-    </pointLight>
+    <>
+      <pointLight ref={ref} {...restProps}>
+        <mesh>
+          <meshBasicMaterial color="#fff" />
+          <boxGeometry args={[1, 0.25, 0.25]} />
+        </mesh>
+      </pointLight>
+
+      {/* <directionalLight ref={ref} {...restProps}  color="#fff">
+        <mesh>
+          <meshBasicMaterial color="#fff" />
+          <boxGeometry args={[1, 0.25, 0.25]} />
+        </mesh>
+      </directionalLight> */}
+    </>
   )
 }
 
+const Cards = ({ children, ...restProps }) => {
+  return <group {...restProps}>{children}</group>
+}
+
 export const Three = ({ bg, ...restProps }) => {
-  const { lightIntensity, lightX, lightZ } = useControls({
+  const { lightIntensity, lightX, lightY, lightZ, light2 } = useControls({
     lightIntensity: {
-      value: 1,
+      value: 1.5,
       min: 0.01,
       max: 10,
     },
@@ -66,42 +78,60 @@ export const Three = ({ bg, ...restProps }) => {
       min: -8,
       max: 8,
     },
+    lightY: {
+      value: 2,
+      min: -8,
+      max: 8,
+    },
     lightZ: {
       value: -3.3,
       min: -8,
       max: 0,
     },
+    light2: false,
   })
 
   return (
     <StyledThree {...restProps}>
       <Canvas style={{ height: '100vh' }} shadows={{ type: PCFSoftShadowMap }}>
-        <OrbitControls enableZoom={false} enablePan={false} />
+        <OrbitControls enableZoom={true} enablePan={true} />
         {/* @ts-ignore */}
         <PerspectiveCamera makeDefault position={[0, 0, 4]} fov={30}>
-          <Light
-            castShadow
-            position={[lightX, 2, -lightZ]}
-            intensity={lightIntensity}
-          />
-          <Light
+          {/* <Light
             position={[lightX - 1, 2, -lightZ]}
             intensity={lightIntensity}
           />
           <Light
             position={[lightX + 1, 2, -lightZ]}
             intensity={lightIntensity}
+          /> */}
+          <Light
+            castShadow
+            position={[lightX, lightY, -lightZ]}
+            intensity={lightIntensity}
           />
+          {light2 && (
+            <Light
+              castShadow
+              position={[lightX, -lightY, -lightZ]}
+              intensity={lightIntensity}
+            />
+          )}
         </PerspectiveCamera>
 
         <ambientLight />
         <Glow color={chroma(bg).brighten(0.5).css()} />
 
-        <Card />
-        <Card position-z={-0.01 * 5} rotation-z={0.1 * 0.5} />
-        <Card position-z={-0.02 * 5} rotation-z={0.2 * 0.5} />
-        <Card position-z={-0.03 * 5} rotation-z={0.3 * 0.5} />
+        <Cards>
+          {/* <Card />
+          <Card position-z={-0.01 * 5} rotation-z={0.1 * 0.5} />
+          <Card position-z={-0.02 * 5} rotation-z={0.2 * 0.5} />
+          <Card position-z={-0.03 * 5} rotation-z={0.3 * 0.5} /> */}
 
+          {range(0, 4).map((i) => (
+            <Card key={i} position-x={i * 1.25} />
+          ))}
+        </Cards>
         <EffectComposer>
           <Noise opacity={0.02} />
         </EffectComposer>
