@@ -1,6 +1,5 @@
 import { useRef } from 'react'
 import { NearestFilter, Group, Vector2, Vector3 } from 'three'
-// import { mergeBufferGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { useFrame } from '@react-three/fiber'
 import { useTexture, useGLTF } from '@react-three/drei'
 import { useControls } from 'leva'
@@ -12,10 +11,7 @@ const textureConfig = (texture) => {
 const ORIGIN_3 = new Vector3()
 
 export const Card = (props) => {
-  const {
-    nodes,
-    // materials
-  } = useGLTF('/models/card.gltf')
+  const { nodes } = useGLTF('/models/card.gltf')
 
   const levaProps = useControls({
     specularIntensity: { value: 1, min: 0, max: 10 },
@@ -69,18 +65,6 @@ export const Card = (props) => {
     cardFaces.rotation.x += dx * 0.1
     cardFaces.rotation.y += dy * 0.1
   })
-
-  // const geometry = useMemo(() => {
-  //   return mergeBufferGeometries([
-  //     nodes.Cube002.geometry,
-  //     nodes.Cube002_1.geometry,
-  //     nodes.Cube002_2.geometry,
-  //   ])
-  // }, [
-  //   nodes.Cube002.geometry,
-  //   nodes.Cube002_1.geometry,
-  //   nodes.Cube002_2.geometry,
-  // ])
 
   const modelCorrections = {
     'rotation-y': Math.PI * -0.5,

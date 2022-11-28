@@ -13,6 +13,7 @@ import {
 } from '@react-three/drei'
 import { useControls } from 'leva'
 import { Card } from './components/Card'
+import { useContent } from 'hooks/useContent'
 
 const StyledThree = styled.div`
   position: relative;
@@ -66,7 +67,7 @@ const Cards = ({ children, ...restProps }) => {
   return <group {...restProps}>{children}</group>
 }
 
-export const Three = ({ bg, ...restProps }) => {
+export const ThreeApp = ({ bg, ...restProps }) => {
   const { lightIntensity, lightX, lightY, lightZ, light2 } = useControls({
     lightIntensity: {
       value: 1.5,
@@ -90,6 +91,9 @@ export const Three = ({ bg, ...restProps }) => {
     },
     light2: false,
   })
+
+  // const cards =
+  useContent()
 
   return (
     <StyledThree {...restProps}>
