@@ -13,6 +13,78 @@ import { TProcessContentProps } from './types'
 
 export default {} as typeof Worker & { new (): Worker }
 
+const drawText = (
+  ctx: CanvasRenderingContext2D,
+  style: typeof TEXT_STYLE[keyof typeof TEXT_STYLE],
+  color: string,
+  item: {
+    content: string
+    x: number
+    y: number
+    width: number
+    height: number
+  }
+) => {
+  ctx.save()
+  const lineHeight = style.fontSize * style.lineHeightMultiplier
+  ctx.font = `${style.fontSize}px/${lineHeight}px ${style.font}`
+  ctx.fillStyle = color
+
+  canvasTxt.font = style.font
+  canvasTxt.fontSize = style.fontSize
+  canvasTxt.fontStyle = style.fontWeight
+  canvasTxt.align = style.align
+  canvasTxt.vAlign = 'top'
+  canvasTxt.lineHeight = lineHeight
+  canvasTxt.drawText(ctx, item.content, item.x, item.y, item.width, item.height)
+  ctx.restore()
+}
+
+const drawImage = (
+  ctx: CanvasRenderingContext2D,
+  opacity: number,
+  item: {
+    content: ImageBitmap
+    x: number
+    y: number
+    width: number
+    height: number
+  }
+) => {
+  ctx.save()
+  ctx.globalAlpha = opacity
+  ctx.drawImage(item.content, item.x, item.y, item.width, item.height)
+  ctx.globalAlpha = 1
+  ctx.restore()
+}
+
+const drawCard = (
+  backgroundColor: string,
+  propsWithCanvas: any,
+  drawFn: (ctx) => void,
+  canvas: HTMLCanvasElement | OffscreenCanvas
+) =>
+  drawCanvas((ctx) => {
+    scaleContext(ctx, propsWithCanvas)
+
+    // Flip the canvas so its in correct position for three-js
+    ctx.translate(0, propsWithCanvas.canvasStyle.height)
+    ctx.scale(1, -1)
+    // Phew, glad thats over
+
+    ctx.fillStyle = backgroundColor
+    ctx.fillRect(
+      0,
+      0,
+      propsWithCanvas.canvasStyle.width,
+      propsWithCanvas.canvasStyle.height
+    )
+
+    ctx.save()
+    drawFn(ctx)
+    ctx.restore()
+  }, canvas)
+
 // Define API
 export const api = {
   processContent: async (props: TProcessContentProps) => {
@@ -36,49 +108,49 @@ export const api = {
     )
 
     return cards.map((card) => {
-      const getBitmap = () =>
+      const getDiffuse = () =>
         (
-          drawCanvas((ctx) => {
-            scaleContext(ctx, propsWithCanvas)
-            card.items.forEach(({ type, x, y, width, height, content }) => {
-              ctx.save()
+          drawCard(
+            '#0D0E1A',
+            propsWithCanvas,
+            (ctx) => {
+              card.items.forEach((item) => {
+                if (item.type === 'img') {
+                  drawImage(ctx, 0.2, item)
+                  return
+                }
+                drawText(ctx, TEXT_STYLE[item.type], '#323232', item)
+              })
+            },
+            canvas
+          ) as typeof canvas
+        ).transferToImageBitmap()
 
-              if (type === 'img') {
-                ctx.drawImage(content, x, y, width, height)
-                ctx.restore()
-                return
-              }
+      const getSpecularColor = () =>
+        (
+          drawCard(
+            '#0D0E19',
+            propsWithCanvas,
+            (ctx) => {
+              card.items.forEach((item) => {
+                if (item.type === 'img') {
+                  drawImage(ctx, 1, item)
+                  return
+                }
+                drawText(ctx, TEXT_STYLE[item.type], '#ffffff', item)
+              })
+            },
+            canvas
+          ) as typeof canvas
+        ).transferToImageBitmap()
 
-              const textStyle = TEXT_STYLE[type as keyof typeof TEXT_STYLE]
-              const lineHeight =
-                textStyle.fontSize * textStyle.lineHeightMultiplier
-              ctx.font = `${textStyle.fontSize}px/${lineHeight}px ${textStyle.font}`
-              ctx.fillStyle = '#f0f'
-
-              canvasTxt.font = textStyle.font
-              canvasTxt.fontSize = textStyle.fontSize
-              canvasTxt.fontStyle = textStyle.fontWeight
-              canvasTxt.align = textStyle.align
-              canvasTxt.vAlign = 'top'
-              canvasTxt.lineHeight = lineHeight
-              canvasTxt.drawText(ctx, content, x, y, width, height)
-            })
-
-            ctx.restore()
-          }, canvas) as typeof canvas
-        )
-          // @ts-ignore
-          .transferToImageBitmap()
-
-      // for (let i = 0; i < 100; i++) {
-      //   getBitmap()
-      // }
-
-      const imageBitmap = getBitmap() as ImageBitmap
+      const diffuse = getDiffuse() as ImageBitmap
+      const specularColor = getSpecularColor() as ImageBitmap
 
       return {
         // ...card,
-        imageBitmap,
+        diffuse,
+        specularColor,
         props,
       }
     })

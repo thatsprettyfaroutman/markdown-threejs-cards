@@ -2,7 +2,6 @@ import styled, { createGlobalStyle } from 'styled-components'
 import { ThreeApp } from 'ThreeApp'
 import chroma from 'chroma-js'
 import { useControls } from 'leva'
-import { useContent } from 'hooks/useContent'
 
 const GlobalStyle = createGlobalStyle<{ bg: string }>`
   html, body {
@@ -27,10 +26,6 @@ export const App = (props) => {
   })
 
   const bg = chroma('#141328').darken(bgDarken).css()
-
-  // const cards =
-  useContent()
-  // console.log(cards)
 
   return (
     <>

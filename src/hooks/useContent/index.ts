@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { canvasMeasureApi } from './workers'
 
 const CANVAS_STYLE = {
@@ -33,15 +33,8 @@ export const useContent = () => {
     undefined | Awaited<ReturnType<typeof canvasMeasureApi.processContent>>
   >()
 
-  const mounted = useRef(true)
-  useEffect(
-    () => () => {
-      mounted.current = false
-    },
-    []
-  )
-
   useEffect(() => {
+    let mounted = true
     const props = {
       mdSrc: '/content.md',
       devicePixelRatio: devicePixelRatio || 1,
@@ -60,14 +53,18 @@ export const useContent = () => {
 
     // setTimeout(() => {
     cardsPromise.then((cards) => {
-      // console.log('FROM WW', cards)
-      // console.log(promiseCache._cache)
+      // console.log('FROM WW', cards, mounted)
+      // console.log( promiseCache._cache)
       // console.timeEnd('WW')
-      if (mounted.current) {
+      if (mounted) {
         setCards(cards)
       }
     })
     // }, 5000)
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   return cards

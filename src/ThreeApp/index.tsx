@@ -92,8 +92,7 @@ export const ThreeApp = ({ bg, ...restProps }) => {
     light2: false,
   })
 
-  // const cards =
-  useContent()
+  const cards = useContent()
 
   return (
     <StyledThree {...restProps}>
@@ -132,9 +131,19 @@ export const ThreeApp = ({ bg, ...restProps }) => {
           <Card position-z={-0.02 * 5} rotation-z={0.2 * 0.5} />
           <Card position-z={-0.03 * 5} rotation-z={0.3 * 0.5} /> */}
 
-          {range(0, 4).map((i) => (
-            <Card key={i} position-x={i * 1.25} />
-          ))}
+          {range(0, (cards?.length || 0) + 1).map((i, _, all) => {
+            const n = 3
+            const x = i % n
+            const y = ~~(i / n)
+            return (
+              <Card
+                key={i}
+                position-x={x * 1.25}
+                position-y={y * -1.65}
+                card={i !== 0 ? cards[i - 1] : undefined}
+              />
+            )
+          })}
         </Cards>
         <EffectComposer>
           <Noise opacity={0.02} />
