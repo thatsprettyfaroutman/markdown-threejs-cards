@@ -1,5 +1,5 @@
 import styled, { createGlobalStyle } from 'styled-components'
-import { Three } from './Three'
+import { ThreeApp } from 'ThreeApp'
 import chroma from 'chroma-js'
 import { useControls } from 'leva'
 
@@ -31,7 +31,7 @@ export const App = (props) => {
     <>
       <GlobalStyle bg={bg} />
       <StyledApp {...props}>
-        <Three bg={bg} />
+        <ThreeApp bg={bg} />
       </StyledApp>
     </>
   )

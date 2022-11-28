@@ -1,6 +1,5 @@
-import { useRef } from 'react'
-import { NearestFilter, Group, Vector2, Vector3 } from 'three'
-// import { mergeBufferGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { useRef, useMemo } from 'react'
+import { NearestFilter, Group, Vector2, Vector3, CanvasTexture } from 'three'
 import { useFrame } from '@react-three/fiber'
 import { useTexture, useGLTF } from '@react-three/drei'
 import { useControls } from 'leva'
@@ -11,11 +10,24 @@ const textureConfig = (texture) => {
 
 const ORIGIN_3 = new Vector3()
 
-export const Card = (props) => {
-  const {
-    nodes,
-    // materials
-  } = useGLTF('/models/card.gltf')
+export const Card = ({ card, ...restProps }) => {
+  const { nodes } = useGLTF('/models/card.gltf')
+
+  const generatedDiffuse = useMemo(() => {
+    if (!card?.diffuse) {
+      return
+    }
+    const texture = new CanvasTexture(card.diffuse)
+    return texture
+  }, [card])
+
+  const generatedSpecularColor = useMemo(() => {
+    if (!card?.diffuse) {
+      return
+    }
+    const texture = new CanvasTexture(card.specularColor)
+    return texture
+  }, [card])
 
   const levaProps = useControls({
     specularIntensity: { value: 1, min: 0, max: 10 },
@@ -70,18 +82,6 @@ export const Card = (props) => {
     cardFaces.rotation.y += dy * 0.1
   })
 
-  // const geometry = useMemo(() => {
-  //   return mergeBufferGeometries([
-  //     nodes.Cube002.geometry,
-  //     nodes.Cube002_1.geometry,
-  //     nodes.Cube002_2.geometry,
-  //   ])
-  // }, [
-  //   nodes.Cube002.geometry,
-  //   nodes.Cube002_1.geometry,
-  //   nodes.Cube002_2.geometry,
-  // ])
-
   const modelCorrections = {
     'rotation-y': Math.PI * -0.5,
     'rotation-z': Math.PI,
@@ -89,7 +89,7 @@ export const Card = (props) => {
   }
 
   return (
-    <group {...props} dispose={null}>
+    <group {...restProps} dispose={null}>
       <mesh
         {...modelCorrections}
         geometry={nodes.Cube002.geometry}
@@ -108,11 +108,11 @@ export const Card = (props) => {
           <mesh castShadow receiveShadow geometry={nodes.Cube002.geometry}>
             <meshPhysicalMaterial
               attach="material"
-              map={texture}
+              map={generatedDiffuse || texture}
               roughness={0.5}
               roughnessMap={roughness}
               metalnessMap={metal}
-              specularColorMap={specularColor}
+              specularColorMap={generatedSpecularColor || specularColor}
               specularIntensity={levaProps.specularIntensity}
               bumpMap={bump}
               bumpScale={levaProps.bumpScale}
