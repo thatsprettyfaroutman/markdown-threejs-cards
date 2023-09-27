@@ -1,5 +1,6 @@
 export type TProcessContentProps = {
   mdSrc: string
+  md?: string
   devicePixelRatio: number
   canvasStyle: {
     width: number

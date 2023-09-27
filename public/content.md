@@ -1,10 +1,12 @@
 # Hello welcome
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Scisse enim te quis coarguere possit? Certe non potest. Summus dolor plures dies manere non potest? Sed haec nihil sane ad rem; Hoc est non dividere, sed frangere.
+Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+Lorem Ipsum has been the industry’s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
 
 ## Why?
 
-Et ille ridens: Video, inquit, quid agas; Quodsi ipsam honestatem undique pertectam atque absolutam. Quaerimus enim finem bonorum. Ubi ut eam caperet aut quando? Primum quid tu dicis breve?
+It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.
+It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 
 ## What?
 
@@ -12,7 +14,7 @@ Quare conare, quaeso. Sed haec omittamus; Quam nemo umquam voluptatem appellavit
 
 Quid autem habent admirationis, cum prope accesseris? Sed quod proximum fuit non vidit.
 
-![specularColor](/test.png)
+![test](/test.SpecularColor.png,/test.Diffuse.png)
 
 Quid vero? At hoc in eo M. Duo Reges: constructio interrete.
 

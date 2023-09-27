@@ -1,5 +1,6 @@
 import canvasTxt from 'canvas-txt'
 import { last } from 'ramda'
+import camelCase from 'lodash.camelcase'
 import { TProcessContentProps, TProcessContentPropsWithCanvas } from './types'
 import { TEXT_STYLE } from './text'
 
@@ -50,12 +51,11 @@ export const scaleContext = (
   ctx.scale(ratio, ratio)
 }
 
-export const loadImage = (src: string) =>
-  new Promise<HTMLImageElement>((resolve) => {
-    const img = new Image()
-    img.onload = () => resolve(img)
-    img.src = src
-  })
+export const loadImage = async (src: string) => {
+  const imgRes = await fetch(src)
+  const imgBlob = await imgRes.blob()
+  return createImageBitmap(imgBlob)
+}
 
 export const processMd = async (md: string) => {
   const items = await Promise.all(
@@ -72,11 +72,17 @@ export const processMd = async (md: string) => {
         }
 
         if (x.startsWith('![')) {
-          const [, alt, src] = x.match(/!\[(.*)\]\((.*)\)/)
-          const imgRes = await fetch(src)
-          const imgBlob = await imgRes.blob()
-          const img = await createImageBitmap(imgBlob)
-          return ['img', img, alt] as ['img', typeof img, string]
+          const [, alt, srcsString] = x.match(/!\[(.*)\]\((.*)\)/)
+          const srcs = srcsString.split(',').map((x) => x.trim())
+          const imgs = await Promise.all(
+            srcs.map(async (src) => {
+              const name = camelCase(last(src.split('.png')[0].split('.')))
+              const img = await loadImage(src)
+              return [name, img] as [string, typeof img]
+            })
+          )
+          const imgMap = Object.fromEntries(imgs)
+          return ['img', imgMap, alt] as ['img', typeof imgMap, string]
         }
 
         if (!x) {
@@ -86,6 +92,7 @@ export const processMd = async (md: string) => {
         return ['p', x] as ['p', string]
       })
   )
+
   return items.filter(Boolean)
 }
 
@@ -152,24 +159,24 @@ export const measureText = (
     resultHeight = Math.ceil(textHeight)
   }, props.canvas)
 
-  // document.body.appendChild(c)
-
   return { width, height: resultHeight }
 }
 
 export const measureImage = (
-  img: ImageBitmap,
+  imgMap: { [key: string]: ImageBitmap },
   props: TProcessContentPropsWithCanvas
 ) => {
+  const testImg = Object.values(imgMap)[0]
+
   let { width: maxWidth, height: maxHeight } = props.canvasStyle
   maxWidth -= props.canvasStyle.padding * 2
   maxHeight -= props.canvasStyle.padding * 2
 
-  const hr = maxWidth / img.width
-  const vr = maxHeight / img.height
+  const hr = maxWidth / testImg.width
+  const vr = maxHeight / testImg.height
   const ratio = Math.min(hr, vr)
-  const width = img.width * ratio
-  const height = img.height * ratio
+  const width = testImg.width * ratio
+  const height = testImg.height * ratio
   const x = 0 // (maxWidth - width) * 0.5
   const y = 0 // (maxHeight - height) * 0.5
 
@@ -178,7 +185,7 @@ export const measureImage = (
     ctx.fillStyle = '#f0f'
     ctx.strokeStyle = '#f0f'
     ctx.strokeRect(0, 0, maxWidth, maxHeight)
-    ctx.drawImage(img, x, y, width, height)
+    ctx.drawImage(testImg, x, y, width, height)
     ctx.strokeRect(x, y, width, height)
     ctx.fillText(`${width} x ${height}`, 0, y + height + 16)
   }, props.canvas)
@@ -223,7 +230,7 @@ export const measureItem = (
     return {
       type,
       content,
-      ...measureImage(content as ImageBitmap, props),
+      ...measureImage(content, props),
     }
   }
 }
@@ -241,7 +248,7 @@ export const getCards = (
         (
           acc: Array<{
             items: Array<
-              typeof items[number] & {
+              (typeof items)[number] & {
                 x: number
                 y: number
               }
@@ -272,7 +279,7 @@ export const getCards = (
                 props.canvasStyle.gap +
                 nextItem.height <=
                 height
-            if (!nextFits) {
+            if (!nextFits || !nextItem) {
               // Push h2 to next card, don't let it be the last item
               fits = false
             }

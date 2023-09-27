@@ -1,8 +1,20 @@
 import { useRef, useMemo } from 'react'
 import { NearestFilter, Group, Vector2, Vector3, CanvasTexture } from 'three'
-import { useFrame } from '@react-three/fiber'
-import { useTexture, useGLTF } from '@react-three/drei'
+import { type GroupProps, useFrame } from '@react-three/fiber'
+import { useTexture, useGLTF, MeshDiscardMaterial } from '@react-three/drei'
+import { a } from '@react-spring/three'
 import { useControls } from 'leva'
+// import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise'
+
+// const improvedNoise = new ImprovedNoise()
+
+// for (let i = 0; i < 100; i++) {
+//   console.log(improvedNoise.noise(i * 0.01, 0.2, 0.3))
+// }
+
+type TCardProps = GroupProps & {
+  card: any
+}
 
 const textureConfig = (texture) => {
   texture.minFilter = NearestFilter
@@ -10,28 +22,31 @@ const textureConfig = (texture) => {
 
 const ORIGIN_3 = new Vector3()
 
-export const Card = ({ card, ...restProps }) => {
+export const Card = ({ card, ...restProps }: TCardProps) => {
+  // @ts-ignore
   const { nodes } = useGLTF('/models/card.gltf')
 
-  const generatedDiffuse = useMemo(() => {
-    if (!card?.diffuse) {
-      return
-    }
-    const texture = new CanvasTexture(card.diffuse)
-    return texture
-  }, [card])
+  // const generatedDiffuse = useMemo(() => {
+  //   if (!card?.diffuse) {
+  //     return
+  //   }
+  //   const texture = new CanvasTexture(card.diffuse)
+  //   return texture
+  // }, [card])
 
-  const generatedSpecularColor = useMemo(() => {
-    if (!card?.diffuse) {
-      return
-    }
-    const texture = new CanvasTexture(card.specularColor)
-    return texture
-  }, [card])
+  // const generatedSpecularColor = useMemo(() => {
+  //   if (!card?.diffuse) {
+  //     return
+  //   }
+  //   const texture = new CanvasTexture(card.specularColor)
+  //   return texture
+  // }, [card])
 
   const levaProps = useControls({
+    roughness: { value: 0.5, min: 0, max: 1 },
+    metalness: { value: 0, min: 0, max: 1 },
     specularIntensity: { value: 1, min: 0, max: 10 },
-    bumpScale: { value: 0.0005, min: -0.001, max: 0.001 },
+    bumpScale: { value: 0.001, min: -0.001, max: 0.001 },
   })
 
   const [texture, specularColor, metal, roughness, bump] = useTexture(
@@ -56,32 +71,6 @@ export const Card = ({ card, ...restProps }) => {
       textureConfig
     )
 
-  const cardFacesGroupRef = useRef<Group | undefined>()
-  const pointerRef = useRef<Vector2 | undefined>()
-
-  useFrame(() => {
-    const cardFaces = cardFacesGroupRef.current
-    const pointer = pointerRef.current
-    if (!cardFaces) {
-      return
-    }
-
-    if (!pointer) {
-      cardFaces.rotation.x *= 0.9
-      cardFaces.rotation.y *= 0.9
-      return
-    }
-
-    const tx = -pointer.y * 0.4
-    const ty = pointer.x * 0.3
-
-    const dx = tx - cardFaces.rotation.x
-    const dy = ty - cardFaces.rotation.y
-
-    cardFaces.rotation.x += dx * 0.1
-    cardFaces.rotation.y += dy * 0.1
-  })
-
   const modelCorrections = {
     'rotation-y': Math.PI * -0.5,
     'rotation-z': Math.PI,
@@ -89,36 +78,23 @@ export const Card = ({ card, ...restProps }) => {
   }
 
   return (
-    <group {...restProps} dispose={null}>
-      <mesh
-        {...modelCorrections}
-        geometry={nodes.Cube002.geometry}
-        onPointerMove={(e) => {
-          pointerRef.current =
-            // @ts-ignore
-            e.point.clone().sub(e.object.getWorldPosition(ORIGIN_3))
-        }}
-        onPointerLeave={() => (pointerRef.current = undefined)}
-      >
-        <meshBasicMaterial color="#f0f" transparent opacity={0} />
-      </mesh>
-
-      <group ref={cardFacesGroupRef}>
-        <group {...modelCorrections}>
-          <mesh castShadow receiveShadow geometry={nodes.Cube002.geometry}>
-            <meshPhysicalMaterial
-              attach="material"
-              map={generatedDiffuse || texture}
-              roughness={0.5}
-              roughnessMap={roughness}
-              metalnessMap={metal}
-              specularColorMap={generatedSpecularColor || specularColor}
-              specularIntensity={levaProps.specularIntensity}
-              bumpMap={bump}
-              bumpScale={levaProps.bumpScale}
-            />
-          </mesh>
-          <mesh castShadow receiveShadow geometry={nodes.Cube002_1.geometry}>
+    // @ts-ignore
+    <a.group {...restProps} dispose={null}>
+      <group {...modelCorrections}>
+        <mesh castShadow receiveShadow geometry={nodes.Cube002.geometry}>
+          <meshPhysicalMaterial
+            attach="material"
+            map={card?.texture['diffuse'] || texture}
+            // roughness={0.5}
+            roughnessMap={roughness}
+            metalnessMap={metal}
+            specularColorMap={card?.texture['specularColor'] || specularColor}
+            bumpMap={card?.texture['normal']}
+            // bumpMap={bump}
+            {...levaProps}
+          />
+        </mesh>
+        {/* <mesh castShadow receiveShadow geometry={nodes.Cube002_1.geometry}>
             <meshPhysicalMaterial
               attach="material"
               map={backTexture}
@@ -130,8 +106,8 @@ export const Card = ({ card, ...restProps }) => {
               bumpMap={backBump}
               bumpScale={levaProps.bumpScale}
             />
-          </mesh>
-          <mesh
+          </mesh> */}
+        {/* <mesh
             castShadow
             receiveShadow
             geometry={nodes.Cube002_2.geometry}
@@ -143,10 +119,9 @@ export const Card = ({ card, ...restProps }) => {
               metalness={0}
               color="#0D0E1A"
             />
-          </mesh>
-        </group>
+          </mesh> */}
       </group>
-    </group>
+    </a.group>
   )
 }
 
