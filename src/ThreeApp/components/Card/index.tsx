@@ -1,46 +1,30 @@
-import { useRef, useMemo } from 'react'
-import { NearestFilter, Group, Vector2, Vector3, CanvasTexture } from 'three'
+import { useRef } from 'react'
+import { NearestFilter, Vector2, Vector3, Group } from 'three'
 import { type GroupProps, useFrame } from '@react-three/fiber'
 import { useTexture, useGLTF, MeshDiscardMaterial } from '@react-three/drei'
 import { a } from '@react-spring/three'
 import { useControls } from 'leva'
-// import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise'
 
-// const improvedNoise = new ImprovedNoise()
-
-// for (let i = 0; i < 100; i++) {
-//   console.log(improvedNoise.noise(i * 0.01, 0.2, 0.3))
-// }
+const ORIGIN = new Vector3(0)
+const MODEL_TRANSFORMS = {
+  'rotation-y': Math.PI * -0.5,
+  'rotation-z': Math.PI,
+  'scale-x': -0.25,
+}
 
 type TCardProps = GroupProps & {
   card: any
 }
 
-const textureConfig = (texture) => {
-  texture.minFilter = NearestFilter
+const textureConfig = (textures) => {
+  textures.forEach((texture) => {
+    texture.minFilter = NearestFilter
+  })
 }
-
-const ORIGIN_3 = new Vector3()
 
 export const Card = ({ card, ...restProps }: TCardProps) => {
   // @ts-ignore
   const { nodes } = useGLTF('/models/card.gltf')
-
-  // const generatedDiffuse = useMemo(() => {
-  //   if (!card?.diffuse) {
-  //     return
-  //   }
-  //   const texture = new CanvasTexture(card.diffuse)
-  //   return texture
-  // }, [card])
-
-  // const generatedSpecularColor = useMemo(() => {
-  //   if (!card?.diffuse) {
-  //     return
-  //   }
-  //   const texture = new CanvasTexture(card.specularColor)
-  //   return texture
-  // }, [card])
 
   const levaProps = useControls({
     roughness: { value: 0.5, min: 0, max: 1 },
@@ -49,80 +33,77 @@ export const Card = ({ card, ...restProps }: TCardProps) => {
     bumpScale: { value: 0.001, min: -0.001, max: 0.001 },
   })
 
-  const [texture, specularColor, metal, roughness, bump] = useTexture(
-    [
-      '/textures/diffuseStroke.png',
-      '/textures/specularColorStroke.png',
-      '/textures/metalStroke.png',
-      '/textures/roughnessStroke.png',
-      '/textures/bumpStroke.png',
-    ],
+  const [metal, roughness] = useTexture(
+    ['/metalness.jpg', '/roughness.jpg'],
     textureConfig
   )
-  const [backTexture, backSpecularColor, backMetal, backRoughness, backBump] =
-    useTexture(
-      [
-        '/textures/backDiffuseStroke.png',
-        '/textures/backSpecularColorStroke.png',
-        '/textures/backMetalStroke.png',
-        '/textures/backRoughnessStroke.png',
-        '/textures/backBumpStroke.png',
-      ],
-      textureConfig
-    )
 
-  const modelCorrections = {
-    'rotation-y': Math.PI * -0.5,
-    'rotation-z': Math.PI,
-    'scale-x': -0.25,
-  }
+  const cardFacesGroupRef = useRef<Group | undefined>()
+  const pointerRef = useRef<Vector2 | undefined>()
+
+  useFrame(() => {
+    const cardFaces = cardFacesGroupRef.current
+    const pointer = pointerRef.current
+    if (!cardFaces) {
+      return
+    }
+
+    if (!pointer) {
+      cardFaces.rotation.x *= 0.9
+      cardFaces.rotation.y *= 0.9
+      return
+    }
+
+    const tx = -pointer.y * 0.4
+    const ty = pointer.x * 0.3
+
+    const dx = tx - cardFaces.rotation.x
+    const dy = ty - cardFaces.rotation.y
+
+    cardFaces.rotation.x += dx * 0.1
+    cardFaces.rotation.y += dy * 0.1
+  })
 
   return (
     // @ts-ignore
     <a.group {...restProps} dispose={null}>
-      <group {...modelCorrections}>
-        <mesh castShadow receiveShadow geometry={nodes.Cube002.geometry}>
-          <meshPhysicalMaterial
-            attach="material"
-            map={card?.texture['diffuse'] || texture}
-            // roughness={0.5}
-            roughnessMap={roughness}
-            metalnessMap={metal}
-            specularColorMap={card?.texture['specularColor'] || specularColor}
-            bumpMap={card?.texture['normal']}
-            // bumpMap={bump}
-            {...levaProps}
-          />
-        </mesh>
-        {/* <mesh castShadow receiveShadow geometry={nodes.Cube002_1.geometry}>
+      <mesh
+        // rotation-x={-90 * DEG}
+        onPointerMove={(e) => {
+          pointerRef.current =
+            // @ts-ignore
+            e.point.clone().sub(e.object.getWorldPosition(ORIGIN))
+        }}
+        onPointerLeave={() => (pointerRef.current = undefined)}
+      >
+        <planeGeometry args={[1, 1.5]} />
+        {/* <meshBasicMaterial color="#f0f" wireframe /> */}
+        <MeshDiscardMaterial />
+      </mesh>
+
+      <group ref={cardFacesGroupRef}>
+        <group {...MODEL_TRANSFORMS}>
+          <mesh castShadow receiveShadow geometry={nodes.Cube002.geometry}>
             <meshPhysicalMaterial
-              attach="material"
-              map={backTexture}
-              roughness={0.5}
-              roughnessMap={backRoughness}
-              metalnessMap={backMetal}
-              specularColorMap={backSpecularColor}
-              specularIntensity={levaProps.specularIntensity}
-              bumpMap={backBump}
-              bumpScale={levaProps.bumpScale}
+              map={card?.textureMap?.diffuse}
+              roughnessMap={roughness}
+              metalnessMap={metal}
+              specularColorMap={card?.textureMap?.specularColor}
+              bumpMap={card?.textureMap?.normal}
+              // side={DoubleSide}
+              {...levaProps}
             />
-          </mesh> */}
-        {/* <mesh
-            castShadow
-            receiveShadow
-            geometry={nodes.Cube002_2.geometry}
-            // material={materials.Edge}
-          >
-            <meshPhysicalMaterial
-              attach="material"
-              roughness={0.6}
-              metalness={0}
-              color="#0D0E1A"
-            />
-          </mesh> */}
+          </mesh>
+
+          <mesh castShadow receiveShadow geometry={nodes.Cube002_1.geometry}>
+            <meshStandardMaterial color="#000" />
+          </mesh>
+        </group>
       </group>
     </a.group>
   )
 }
 
 useGLTF.preload('/models/card.gltf')
+useTexture.preload('/metalness.jpg')
+useTexture.preload('/roughness.jpg')

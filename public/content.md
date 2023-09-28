@@ -1,27 +1,25 @@
-# Hello welcome
+![cover](/cover2.diffuse.png,/cover2.specularColor.png)
 
-Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-Lorem Ipsum has been the industry’s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
+# Hello
 
-## Why?
+These cards are dynamically generated from markdown and rendered with three.js (or r3f).
 
-It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.
-It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+# Webworker
 
-## What?
+Cards are generated using webworkers, so the main thread isn't blocked 🔥
 
-Quare conare, quaeso. Sed haec omittamus; Quam nemo umquam voluptatem appellavit, appellat;
+# Why?
 
-Quid autem habent admirationis, cum prope accesseris? Sed quod proximum fuit non vidit.
+I wanted to see if it was possible, also needed a challenge 🦂
 
-![test](/test.SpecularColor.png,/test.Diffuse.png)
+# Oh yeah
 
-Quid vero? At hoc in eo M. Duo Reges: constructio interrete.
+Images work too (as long as they're local).
 
-# Psyche del ic Refrig era tor
+![cover](/pic1.specularColor.png,/pic1.diffuse.png)
 
-Duo enim genera quae erant, fecit tria. Indicant pueri, in quibus ut in speculis natura cernitur.
+![cover](/pic2.specularColor.png,/pic2.diffuse.png)
 
-## Ref
+![cover](/pic3.specularColor.png,/pic3.diffuse.png)
 
-Quis non odit sordidos, vanos, leves, futtiles? Scaevolam M. Odium autem et invidiam facile vitabis.
+# 👈 Go ahead and edit

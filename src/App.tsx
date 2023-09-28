@@ -12,18 +12,51 @@ const GlobalStyle = createGlobalStyle<{ bg: string }>`
     font-size: 16px;
     line-height: 1.6;
     background-color: ${(p) => p.bg};
+    overflow: hidden;
   }
 `
 
 const StyledApp = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 2fr;
+  position: relative;
+  /* display: grid; */
+  /* grid-template-columns: 1fr 2fr; */
+
+  > textarea {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 400px;
+    height: 100%;
+    box-sizing: border-box;
+    border: none;
+    padding: 32px;
+    background: transparent;
+    color: #fff;
+
+    &:focus,
+    &:active {
+      outline: none;
+    }
+  }
+`
+
+const ErrorMessage = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000c;
+  color: #fff;
 `
 
 export const App = (props) => {
   const { bgDarken } = useControls({
     bgDarken: {
-      value: -0.2,
+      value: 0.51,
       min: -2,
       max: 2,
       step: 0.01,
@@ -31,10 +64,11 @@ export const App = (props) => {
   })
 
   const bg = chroma('#110825').darken(bgDarken).css()
-  const levaBg = chroma(bg).brighten(0.1).css()
+  const levaBg = chroma(bg).brighten(0.2).css()
 
   const [mdLoading, setMdLoading] = useState(true)
   const [md, setMd] = useState<string | undefined>()
+  const [errored, setErrored] = useState(false)
 
   useEffect(() => {
     const updateInitialMd = async () => {
@@ -48,17 +82,32 @@ export const App = (props) => {
 
   const debouncedMd = useDebounce(md, 1000)
 
+  const editing = md !== debouncedMd
+
   return (
     <>
       <GlobalStyle bg={bg} />
       <StyledApp {...props}>
+        <ThreeApp
+          bg={bg}
+          md={debouncedMd}
+          editing={editing}
+          onError={() => {
+            setErrored(true)
+          }}
+        />
         <textarea
           value={mdLoading ? 'loading' : md}
           onChange={(e) => {
             setMd(e.target.value)
           }}
         />
-        <ThreeApp bg={bg} md={debouncedMd} />
+
+        {errored && (
+          <ErrorMessage>
+            Hmm, that didn't work. Your browser might not support webworkers 😿
+          </ErrorMessage>
+        )}
       </StyledApp>
       <Leva
         collapsed

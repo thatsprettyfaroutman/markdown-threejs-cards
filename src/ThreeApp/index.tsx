@@ -1,125 +1,191 @@
 import { useEffect, useRef } from 'react'
-import { PCFSoftShadowMap, MathUtils, Group } from 'three'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { MathUtils, Group } from 'three'
+import { type GroupProps, Canvas, useFrame, useThree } from '@react-three/fiber'
 import { EffectComposer, Noise } from '@react-three/postprocessing'
 import styled from 'styled-components'
+import chroma from 'chroma-js'
 import {
-  OrbitControls,
   useTexture,
   PerspectiveCamera,
   Billboard,
+  SpotLight,
 } from '@react-three/drei'
-import { useSpringValue } from 'react-spring'
+import { type SpringValue, useSpringValue, to } from 'react-spring'
 import { useControls } from 'leva'
 import { Card } from './components/Card'
-import { useContent } from 'hooks/useContent'
+import { useCards } from 'hooks/useCards'
 
 const DEG = Math.PI / 180
 const TEMP_TRANSFORM = [0, 0, 0]
-const { lerp } = MathUtils
+const { lerp, clamp } = MathUtils
+
+const DPR = Math.min(
+  2,
+  typeof window !== 'undefined' ? window.devicePixelRatio : 0
+)
 
 type TThreeAppProps = {
-  bg?: string
   md?: string
+  bg?: string
+  editing?: boolean
+  onError?: () => void
+}
+
+type TCardsProps = GroupProps & {
+  cards: ReturnType<typeof useCards>['cards']
+  currentIndex: SpringValue<number>
+  hidden: SpringValue<number>
 }
 
 const StyledThree = styled.div`
   position: relative;
 `
 
+const Camera = () => {
+  const { size } = useThree()
+
+  return (
+    <PerspectiveCamera
+      makeDefault
+      position={[0, 0, 4]}
+      fov={25}
+      onUpdate={(c) =>
+        c.setViewOffset(
+          size.width,
+          size.height,
+          -200,
+          0,
+          size.width,
+          size.height
+        )
+      }
+    />
+  )
+}
+
 const Glow = ({ color, ...restProps }) => {
-  const alpha = useTexture('/textures/glow.png')
+  const alpha = useTexture('/glow.png')
+  const { viewport } = useThree()
   return (
     // @ts-ignore
     <Billboard>
-      <mesh position-z={-1} {...restProps}>
-        <planeGeometry args={[5, 5]} />
+      <mesh position-z={-2} {...restProps}>
+        <planeGeometry args={[viewport.width * 1.5, viewport.height * 1.5]} />
         <meshBasicMaterial color={color} transparent alphaMap={alpha} />
       </mesh>
     </Billboard>
   )
 }
 
-const Light = ({ ...restProps }) => {
-  return (
-    <>
-      <pointLight
-        {...restProps}
-        castShadow
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
-      >
-        <mesh>
-          <meshBasicMaterial color="#fff" />
-          <boxGeometry args={[0.1, 0.1, 0.1]} />
-        </mesh>
-      </pointLight>
+const Cards = ({
+  cards,
+  currentIndex,
+  hidden,
+  children,
+  rotation,
+  ...restProps
+}: TCardsProps) => {
+  const { viewport } = useThree()
 
-      {/* <directionalLight ref={ref} {...restProps}  color="#fff">
-        <mesh>
-          <meshBasicMaterial color="#fff" />
-          <boxGeometry args={[1, 0.25, 0.25]} />
-        </mesh>
-      </directionalLight> */}
-    </>
-  )
-}
-
-const Cards = ({ children, ...restProps }) => {
   const ref = useRef<Group>(null)
   useFrame((s) => {
     const cards = ref.current
     if (!cards) {
       return
     }
-    cards.rotation.x = lerp(0, 45 * DEG, -s.mouse.y)
-    cards.rotation.y = lerp(0, 45 * DEG, s.mouse.x)
+    cards.rotation.x = lerp(0, 1 * DEG, -s.mouse.y) + (rotation?.[0] || 0)
+    cards.rotation.y = lerp(0, 1 * DEG, s.mouse.x) + (rotation?.[1] || 0)
+    cards.rotation.z = rotation?.[2] || 0
   })
 
   return (
     <group ref={ref} {...restProps}>
-      {children}
+      {cards.map((card, i) => {
+        const direction = i % 2 === 0 ? 1 : -1
+        const deltaIndex = currentIndex.to((ci) => i - ci)
+        const position = to([deltaIndex, hidden], (di, hi) => {
+          const leaving = Math.min(di, 0)
+
+          const deltaHidden = clamp(i - hi * cards.length, -1, 0)
+
+          TEMP_TRANSFORM[0] = lerp(0, 0.05, di) + lerp(0, 1.5, leaving)
+          TEMP_TRANSFORM[1] = lerp(0, viewport.height, deltaHidden)
+          TEMP_TRANSFORM[2] = -0.26 * di
+          return TEMP_TRANSFORM
+        })
+
+        const rotation = deltaIndex.to((di) => {
+          const leaving = Math.min(di, 0)
+          TEMP_TRANSFORM[0] = 0
+          TEMP_TRANSFORM[1] = 0
+          TEMP_TRANSFORM[2] =
+            lerp(0, -2 * DEG, di) + lerp(0, -10 * DEG * direction, leaving)
+          return TEMP_TRANSFORM
+        })
+
+        return (
+          <Card key={i} position={position} rotation={rotation} card={card} />
+        )
+      })}
     </group>
   )
 }
 
-export const ThreeApp = ({ bg, md, ...restProps }: TThreeAppProps) => {
-  const { lightIntensity, lightX, lightY, lightZ, light2 } = useControls({
+export const ThreeApp = ({
+  md,
+  bg = '#fff',
+  editing = false,
+  onError,
+  ...restProps
+}: TThreeAppProps) => {
+  const {
+    lightIntensity,
+    ambientIntensity,
+    lightX,
+    lightY,
+    lightZ,
+    lightAngle,
+  } = useControls({
     lightIntensity: {
-      value: 5.3,
+      value: 10,
       min: 0.01,
-      max: 10,
+      max: 100,
+    },
+    ambientIntensity: {
+      value: 6,
+      min: 0.01,
+      max: 100,
     },
     lightX: {
-      value: 0,
+      // value: -1.4,
+      value: -0.4,
       min: -8,
       max: 8,
     },
     lightY: {
-      value: 2,
+      // value: 1,
+      value: 1.6,
       min: -8,
       max: 8,
     },
     lightZ: {
-      value: -3.3,
+      // value: -4,
+      value: -3,
       min: -8,
-      max: 0,
+      max: 8,
     },
-    light2: false,
+    lightAngle: {
+      value: 0.26,
+      min: 0,
+      max: 180 * DEG,
+    },
   })
 
-  const content = useContent(md)
-
-  const cards = [
-    // Default is the cover card
-    // TODO: make this a real card
-    undefined,
-
-    // Cards generated from MD
-    ...content.cards,
-  ]
-
+  const { cards, processing, errored } = useCards(md, { dpr: DPR })
   const currentIndex = useSpringValue(0, { config: { precision: 0.0001 } })
+
+  const hidden = useSpringValue(editing || processing ? 1 : 0)
+  hidden.start(editing || processing ? 1 : 0)
 
   useEffect(() => {
     if (!md) {
@@ -128,88 +194,51 @@ export const ThreeApp = ({ bg, md, ...restProps }: TThreeAppProps) => {
     currentIndex.start(0)
   }, [md, currentIndex])
 
+  useEffect(() => {
+    if (errored && onError) {
+      onError()
+    }
+  }, [errored, onError])
+
+  const cardsProps = {
+    cards,
+    currentIndex,
+    hidden,
+  }
+
+  const lightColor =
+    //'#222' ||
+    '#24134A'
+
   return (
     <StyledThree
       {...restProps}
-      onClick={(e) => {
+      onClick={() => {
         currentIndex.start((currentIndex.goal + 1) % (cards.length + 1))
       }}
     >
-      <Canvas
-        style={{ height: '100vh' }}
-        // shadows={{ type: PCFSoftShadowMap }}
-        shadows
-      >
-        {/* <OrbitControls enableZoom={true} enablePan={true} /> */}
+      <Canvas dpr={DPR} style={{ height: '100vh' }} shadows linear>
         {/* @ts-ignore */}
-        <PerspectiveCamera makeDefault position={[0, 0, 4]} fov={25}>
-          {/* <Light
-            position={[lightX - 1, 2, -lightZ]}
-            intensity={lightIntensity}
-          />
-          <Light
-            position={[lightX + 1, 2, -lightZ]}
-            intensity={lightIntensity}
-          /> */}
+        <Camera />
+        <ambientLight args={[lightColor, ambientIntensity]} />
 
-          <Light
-            position={[lightX, lightY, -lightZ]}
-            intensity={lightIntensity}
-          />
-          {light2 && (
-            <Light
-              position={[lightX, -lightY, -lightZ]}
-              intensity={lightIntensity}
-            />
-          )}
-          {/* <Glow
-            color={chroma(bg)
-              .brighten(0.6)
-              // .set('hsl.s', '+0.2')
-              .css()}
-            position-z={-5}
-          /> */}
-        </PerspectiveCamera>
+        <SpotLight
+          position={[lightX, lightY, -lightZ]}
+          // @ts-ignore
+          intensity={lightIntensity}
+          angle={lightAngle}
+          penumbra={0.1}
+          attenuation={4.5}
+          castShadow
+        />
 
-        {/* <Light position={[0, 1, 2]} intensity={10} /> */}
-
-        <ambientLight />
-
-        <Cards>
-          {cards.map((card, i) => {
-            const direction = i % 2 === 0 ? 1 : -1
-
-            const deltaIndex = currentIndex.to((ci) => i - ci)
-
-            const position = deltaIndex.to((di) => {
-              const leaving = Math.min(di, 0)
-              TEMP_TRANSFORM[0] = lerp(0, 2 * direction, leaving)
-              TEMP_TRANSFORM[1] = 0
-              TEMP_TRANSFORM[2] = -0.05 * di
-              return TEMP_TRANSFORM
-            })
-
-            const rotation = deltaIndex.to((di) => {
-              const leaving = Math.min(di, 0)
-              TEMP_TRANSFORM[0] = 0
-              TEMP_TRANSFORM[1] = 0
-              TEMP_TRANSFORM[2] =
-                lerp(0, -1 * DEG, di) + lerp(0, -10 * DEG * direction, leaving)
-              return TEMP_TRANSFORM
-            })
-
-            return (
-              <Card
-                key={i}
-                position={position}
-                rotation={rotation}
-                card={card}
-              />
-            )
-          })}
-        </Cards>
+        <Cards rotation={[-10 * DEG, -10 * DEG, 0]} {...cardsProps} />
+        <Glow
+          color={chroma(lightColor).brighten(0.5).hex()}
+          // color="#f0f"
+        />
         <EffectComposer>
-          <Noise opacity={0.02} />
+          <Noise opacity={0.05} />
         </EffectComposer>
       </Canvas>
     </StyledThree>
