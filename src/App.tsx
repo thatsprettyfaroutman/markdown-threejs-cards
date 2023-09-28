@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import { useDebounce } from '@uidotdev/usehooks'
 import { ThreeApp } from 'ThreeApp'
@@ -18,8 +18,6 @@ const GlobalStyle = createGlobalStyle<{ bg: string }>`
 
 const StyledApp = styled.div`
   position: relative;
-  /* display: grid; */
-  /* grid-template-columns: 1fr 2fr; */
 
   > textarea {
     position: absolute;
@@ -116,10 +114,6 @@ export const App = (props) => {
           colors: {
             elevation1: levaBg, // bg color of the root panel (main title bar)
             elevation2: levaBg, // bg color of the rows (main panel color)
-            // elevation3: 'var(--figma-color-bg)', // bg color of the inputs
-            // accent1: '#f0f',
-            // accent2: '#222',
-            // accent3: 'var(--figma-color-bg-brand)',
           },
         }}
       />
