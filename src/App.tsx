@@ -87,7 +87,6 @@ export const App = (props) => {
       <GlobalStyle bg={bg} />
       <StyledApp {...props}>
         <ThreeApp
-          bg={bg}
           md={debouncedMd}
           editing={editing}
           onError={() => {
