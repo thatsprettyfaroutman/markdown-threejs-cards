@@ -45,7 +45,7 @@ export const api = {
     const normal = await generateCardTexture({
       contentProps,
       style: {
-        backgroundTextureSrc: '/paper-normal.jpg',
+        backgroundTextureSrc: '/texture/paper-normal.jpg',
         backgroundTextureRepeat: [6, 0],
       },
     })
@@ -55,18 +55,11 @@ export const api = {
 
     const MAP_STYLES = {
       diffuse: {
-        // TODO: background color not needed if using backgroundTexture, and backgroundTexture is more interesting, maybe remove backgroundColor?
-        backgroundColor: '#080818',
-        color: '#323232',
-        opacity: 0.2,
-        backgroundTextureSrc: '/diffuse.jpg',
+        color: '#3331',
+        backgroundTextureSrc: '/texture/diffuse.jpg',
       },
       specularColor: {
-        // TODO: background color not needed if using backgroundTexture, and backgroundTexture is more interesting, maybe remove backgroundColor?
-        backgroundColor: '#000000',
-        color: '#ffffff',
-        opacity: 1,
-        backgroundTextureSrc: '/specularColor.jpg',
+        backgroundTextureSrc: '/texture/specularColor.jpg',
       },
     } as const
 

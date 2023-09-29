@@ -5,6 +5,8 @@ import { useTexture, useGLTF, MeshDiscardMaterial } from '@react-three/drei'
 import { a } from '@react-spring/three'
 import { useControls } from 'leva'
 
+const MODEL_PATH = '/models/card.gltf'
+const METALNESS_ROUGHNESS_TEXTURE_PATH = '/texture/metalnessRoughness.jpg'
 const ORIGIN = new Vector3(0)
 const MODEL_TRANSFORMS = {
   'rotation-y': Math.PI * -0.5,
@@ -16,27 +18,22 @@ type TCardProps = GroupProps & {
   card: any
 }
 
-const textureConfig = (textures) => {
-  textures.forEach((texture) => {
-    texture.minFilter = NearestFilter
-  })
-}
+useTexture.preload(METALNESS_ROUGHNESS_TEXTURE_PATH)
+useGLTF.preload(MODEL_PATH)
 
 export const Card = ({ card, ...restProps }: TCardProps) => {
   // @ts-ignore
-  const { nodes } = useGLTF('/models/card.gltf')
+  const { nodes } = useGLTF(MODEL_PATH)
 
   const levaProps = useControls({
     roughness: { value: 0.5, min: 0, max: 1 },
     metalness: { value: 0, min: 0, max: 1 },
-    specularIntensity: { value: 1, min: 0, max: 10 },
+    specularIntensity: { value: 2.6, min: 0, max: 10 },
     bumpScale: { value: 0.001, min: -0.001, max: 0.001 },
   })
 
-  const [metal, roughness] = useTexture(
-    ['/metalness.jpg', '/roughness.jpg'],
-    textureConfig
-  )
+  const metalnessRoughnessMap = useTexture(METALNESS_ROUGHNESS_TEXTURE_PATH)
+  metalnessRoughnessMap.minFilter = NearestFilter
 
   const cardFacesGroupRef = useRef<Group | undefined>()
   const pointerRef = useRef<Vector2 | undefined>()
@@ -86,8 +83,8 @@ export const Card = ({ card, ...restProps }: TCardProps) => {
           <mesh castShadow receiveShadow geometry={nodes.Cube002.geometry}>
             <meshPhysicalMaterial
               map={card?.textureMap?.diffuse}
-              roughnessMap={roughness}
-              metalnessMap={metal}
+              metalnessMap={metalnessRoughnessMap}
+              roughnessMap={metalnessRoughnessMap}
               specularColorMap={card?.textureMap?.specularColor}
               bumpMap={card?.textureMap?.normal}
               // side={DoubleSide}
@@ -103,7 +100,3 @@ export const Card = ({ card, ...restProps }: TCardProps) => {
     </a.group>
   )
 }
-
-useGLTF.preload('/models/card.gltf')
-useTexture.preload('/metalness.jpg')
-useTexture.preload('/roughness.jpg')

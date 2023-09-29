@@ -4,15 +4,11 @@ import { type GroupProps, Canvas, useFrame, useThree } from '@react-three/fiber'
 import { EffectComposer, Noise } from '@react-three/postprocessing'
 import styled from 'styled-components'
 import chroma from 'chroma-js'
-import {
-  useTexture,
-  PerspectiveCamera,
-  Billboard,
-  SpotLight,
-} from '@react-three/drei'
+import { PerspectiveCamera, SpotLight } from '@react-three/drei'
 import { type SpringValue, useSpringValue, to } from 'react-spring'
 import { useControls } from 'leva'
 import { Card } from './components/Card'
+import { Glow } from './components/Glow'
 import { useCards } from 'hooks/useCards'
 
 const DEG = Math.PI / 180
@@ -60,20 +56,6 @@ const Camera = () => {
         )
       }
     />
-  )
-}
-
-const Glow = ({ color, ...restProps }) => {
-  const alpha = useTexture('/glow.png')
-  const { viewport } = useThree()
-  return (
-    // @ts-ignore
-    <Billboard>
-      <mesh position-z={-2} {...restProps}>
-        <planeGeometry args={[viewport.width * 1.5, viewport.height * 1.5]} />
-        <meshBasicMaterial color={color} transparent alphaMap={alpha} />
-      </mesh>
-    </Billboard>
   )
 }
 
@@ -175,7 +157,7 @@ export const ThreeApp = ({
       max: 8,
     },
     lightAngle: {
-      value: 0.26,
+      value: 0.27,
       min: 0,
       max: 180 * DEG,
     },
@@ -206,9 +188,7 @@ export const ThreeApp = ({
     hidden,
   }
 
-  const lightColor =
-    //'#222' ||
-    '#24134A'
+  const ambientColor = '#362b4d'
 
   return (
     <StyledThree
@@ -220,10 +200,11 @@ export const ThreeApp = ({
       <Canvas dpr={DPR} style={{ height: '100vh' }} shadows linear>
         {/* @ts-ignore */}
         <Camera />
-        <ambientLight args={[lightColor, ambientIntensity]} />
+        <ambientLight args={[ambientColor, ambientIntensity]} />
 
         <SpotLight
           position={[lightX, lightY, -lightZ]}
+          color="#fff"
           // @ts-ignore
           intensity={lightIntensity}
           angle={lightAngle}
@@ -234,7 +215,7 @@ export const ThreeApp = ({
 
         <Cards rotation={[-10 * DEG, -10 * DEG, 0]} {...cardsProps} />
         <Glow
-          color={chroma(lightColor).brighten(0.5).hex()}
+          color={chroma(ambientColor).brighten(0.5).hex()}
           // color="#f0f"
         />
         <EffectComposer>

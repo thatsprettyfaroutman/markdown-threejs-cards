@@ -1,4 +1,4 @@
-![cover](/cover2.diffuse.png,/cover2.specularColor.png)
+![cover](/texture/cover.diffuse.png,/texture/cover.specularColor.png)
 
 # Hello
 
@@ -8,18 +8,10 @@ These cards are dynamically generated from markdown and rendered with three.js (
 
 Cards are generated using webworkers, so the main thread isn't blocked 🔥
 
+![cover](/texture/pic3.specularColor.png,/texture/pic3.diffuse.png)
+
 # Why?
 
-I wanted to see if it was possible, also needed a challenge 🦂
-
-# Oh yeah
-
-Images work too (as long as they're local).
-
-![cover](/pic1.specularColor.png,/pic1.diffuse.png)
-
-![cover](/pic2.specularColor.png,/pic2.diffuse.png)
-
-![cover](/pic3.specularColor.png,/pic3.diffuse.png)
+I wanted to see if it was possible, and also I needed a fun challenge 🦂
 
 # 👈 Go ahead and edit
