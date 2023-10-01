@@ -34,7 +34,7 @@ const prepareCardsForThree = (
   return cards
 }
 
-export const useCards = (md?: string, { dpr = 1 } = {}) => {
+export const useCards = (md?: string) => {
   const [errored, setErrored] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [cards, setCards] = useState<ReturnType<typeof prepareCardsForThree>>(
@@ -49,7 +49,7 @@ export const useCards = (md?: string, { dpr = 1 } = {}) => {
         const content = await canvasMeasureApi.processContent({
           mdSrc: '/content.md',
           md,
-          devicePixelRatio: dpr,
+          devicePixelRatio: 2,
           canvasStyle: CANVAS_STYLE,
         })
         if (mounted) {
@@ -58,13 +58,15 @@ export const useCards = (md?: string, { dpr = 1 } = {}) => {
         }
       } catch (error) {
         console.error(error)
-        setErrored(true)
+        if (mounted) {
+          setErrored(true)
+        }
       }
     })()
     return () => {
       mounted = false
     }
-  }, [dpr, md])
+  }, [md])
 
   return { cards, processing, errored }
 }

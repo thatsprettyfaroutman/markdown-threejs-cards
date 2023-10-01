@@ -3,7 +3,7 @@ import { MathUtils, Group } from 'three'
 import { type GroupProps, useFrame, useThree } from '@react-three/fiber'
 import { type SpringValue, to } from 'react-spring'
 import { useCards } from 'hooks/useCards'
-import { Card } from '../Card'
+import { Card } from 'ThreeApp/components/Card'
 
 const DEG = Math.PI / 180
 const TEMP_TRANSFORM = [0, 0, 0]

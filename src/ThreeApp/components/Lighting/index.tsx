@@ -2,7 +2,7 @@ import { type SpotLightProps } from '@react-three/fiber'
 import { SpotLight } from '@react-three/drei'
 import { useControls } from 'leva'
 import chroma from 'chroma-js'
-import { Glow } from '../Glow'
+import { Glow } from 'ThreeApp/components/Glow'
 
 const DEG = Math.PI / 180
 

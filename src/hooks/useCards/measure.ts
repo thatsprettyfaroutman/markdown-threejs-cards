@@ -26,6 +26,7 @@ const measureText = (
   height -= contentProps.canvasStyle.padding * 2
 
   let resultHeight = 0
+  let contentWidth = 0
 
   drawCanvas((ctx) => {
     scaleContext(ctx, contentProps)
@@ -42,6 +43,8 @@ const measureText = (
     ctx.font = `${
       fontWeight ? `${fontWeight} ` : ''
     }${fontSize}px/${lineHeight}px ${font}`
+
+    contentWidth = ctx.measureText(text).width
 
     canvasTxt.font = font
     canvasTxt.fontSize = fontSize
@@ -67,7 +70,11 @@ const measureText = (
     resultHeight = Math.ceil(textHeight)
   }, contentProps.canvas)
 
-  return { width, height: resultHeight }
+  return {
+    width,
+    height: resultHeight,
+    contentWidth,
+  }
 }
 
 const measureImage = (
@@ -197,8 +204,7 @@ export const getMeasuredCards = (
               contentProps.canvasStyle.gap +
               nextItem.height <=
               height
-          if (!nextFits || !nextItem) {
-            // Push h2s to next card if last item on card
+          if (!nextFits) {
             fits = false
           }
         }

@@ -2,16 +2,19 @@
 
 # Hello
 
-These cards are dynamically generated from markdown and rendered with three.js (or r3f).
+These cards are generated dynamically from markdown and rendered with three.js (or r3f).
 
-# Webworker
+# Offscreen Canvas
 
-Cards are generated using webworkers, so the main thread isn't blocked 🔥
+Textures for the cards are generated with Offscreen Canvas via Web Worker, so the main thread isn't blocked 🔥
 
 ![cover](/texture/pic3.specularColor.png,/texture/pic3.diffuse.png)
 
-# Why?
+![cover](/texture/pic2.specularColor.png,/texture/pic2.diffuse.png)
 
-I wanted to see if it was possible, and also I needed a fun challenge 🦂
+![alttext](/texture/pic1.specularColor.png,/texture/pic1.diffuse.png)
+Figure A: Isometric Work Space
 
-# 👈 Go ahead and edit
+# 👈
+
+## Go ahead and edit

@@ -43,6 +43,7 @@ const drawTextItem = (
     y: number
     width: number
     height: number
+    contentWidth: number
   }
 ) => {
   ctx.save()
@@ -53,7 +54,7 @@ const drawTextItem = (
   canvasTxt.font = style.font
   canvasTxt.fontSize = style.fontSize
   canvasTxt.fontStyle = style.fontWeight
-  canvasTxt.align = style.align
+  canvasTxt.align = item.contentWidth < item.width ? 'center' : style.align
   canvasTxt.vAlign = 'top'
   canvasTxt.lineHeight = lineHeight
   canvasTxt.drawText(ctx, item.content, item.x, item.y, item.width, item.height)
@@ -155,18 +156,17 @@ export const generateCardTexture = async ({
         const dpr = contentProps.devicePixelRatio
         const { width, height } = ctx.canvas
         const [repeatX, repeatY] = backgroundTextureRepeat
-
-        const w = width / repeatX / dpr
+        const w = width / dpr / repeatX
         const h =
           (repeatY
             ? height / repeatY
             : (w / backgroundTexture.width) * backgroundTexture.height) / dpr
         let x = 0
         let y = 0
-        while (y < height) {
+        while (y <= height) {
           ctx.drawImage(backgroundTexture, x, y, w, h)
           x += w
-          if (x > width - w) {
+          if (x >= width - w) {
             y += h
             x = 0
           }
