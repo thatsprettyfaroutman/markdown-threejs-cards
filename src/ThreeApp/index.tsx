@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
+import { type Vector2 } from 'three'
 import { Canvas } from '@react-three/fiber'
 import { EffectComposer, Noise } from '@react-three/postprocessing'
+import { MeshDiscardMaterial } from '@react-three/drei'
 import styled from 'styled-components'
 import { useSpringValue } from 'react-spring'
 import { useCards } from 'hooks/useCards'
@@ -21,6 +23,8 @@ type TThreeAppProps = {
 
 const StyledThree = styled.div`
   position: relative;
+  user-select: none;
+  touch-action: none;
 `
 
 export const ThreeApp = ({
@@ -51,21 +55,37 @@ export const ThreeApp = ({
     cards,
     currentIndex,
     hidden,
+    onClick: (index: number, uv: Vector2) => {
+      if (index !== currentIndex.goal) {
+        currentIndex.start(index)
+        return
+      }
+      const direction = uv.x > 0.25 ? 1 : -1
+      currentIndex.start(
+        Math.max(0, currentIndex.goal + direction) % (cards.length + 1)
+      )
+    },
   }
 
   return (
-    <StyledThree
-      {...restProps}
-      onClick={() => {
-        currentIndex.start((currentIndex.goal + 1) % (cards.length + 1))
-      }}
-    >
+    <StyledThree {...restProps}>
       <Canvas dpr={DPR} style={{ height: '100vh' }} shadows linear>
         {/* @ts-ignore */}
         <Camera />
         <Lighting />
         <Cards rotation={[-10 * DEG, -10 * DEG, 0]} {...cardsProps} />
         <Spinner visible={editing || processing} />
+        <mesh
+          position-z={-40}
+          onClick={() => {
+            if (currentIndex.goal === cards.length) {
+              currentIndex.start(0)
+            }
+          }}
+        >
+          <planeBufferGeometry args={[100, 100]} />
+          <MeshDiscardMaterial />
+        </mesh>
         <EffectComposer>
           <Noise opacity={0.025} />
         </EffectComposer>

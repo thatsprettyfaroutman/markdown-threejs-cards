@@ -19,6 +19,7 @@ const GlobalStyle = createGlobalStyle<{ bg: string }>`
 
 const StyledApp = styled.div`
   position: relative;
+  user-select: none;
 `
 
 const ErrorMessage = styled.div`

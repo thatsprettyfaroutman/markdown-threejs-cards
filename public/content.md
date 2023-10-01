@@ -13,7 +13,7 @@ Textures for the cards are generated with Offscreen Canvas via Web Worker, so th
 ![cover](/texture/pic2.specularColor.png,/texture/pic2.diffuse.png)
 
 ![alttext](/texture/pic1.specularColor.png,/texture/pic1.diffuse.png)
-Figure A: Isometric Work Space
+Isometric Work Space
 
 # 👈
 

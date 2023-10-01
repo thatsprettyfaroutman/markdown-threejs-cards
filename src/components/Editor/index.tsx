@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { useMediaQuery } from '@uidotdev/usehooks'
 import lerp from 'lerp'
 import { a, useSpring } from 'react-spring'
@@ -24,7 +24,7 @@ const Content = styled.div`
   height: 100%;
   max-width: 400px;
   transition: background-color 0.2s ease-out;
-  background-color: #0008;
+  background-color: #000c;
   backdrop-filter: blur(16px);
 
   @media ${MEDIA.tablet} {
@@ -45,6 +45,9 @@ const TextArea = styled.textarea`
   background: transparent;
   color: #fff;
   resize: none;
+  font-size: 12px;
+  font-family: monospace;
+  line-height: 1.4;
 
   &:focus,
   &:active {
@@ -52,9 +55,9 @@ const TextArea = styled.textarea`
   }
 `
 
-const Toggle = styled.div`
+const Toggle = styled.div<{ $active: boolean }>`
   position: absolute;
-  left: 16px;
+  left: calc(100vw - 80px);
   bottom: 16px;
   display: flex;
   justify-content: center;
@@ -63,12 +66,21 @@ const Toggle = styled.div`
   aspect-ratio: 0.714286;
   min-width: 64px;
   border: 2px solid #f8afac;
-  background-color: transparent;
+  background-color: #f8afac00;
   font-size: 14px;
   font-weight: 500;
   color: #f8afac;
   cursor: pointer;
   user-select: none;
+
+  transition: background-color 0.2s ease-out, color 0.2s ease-out;
+
+  ${(p) =>
+    p.$active &&
+    css`
+      background-color: #f8afac;
+      color: #000;
+    `};
 
   @media ${MEDIA.tablet} {
     display: none;
@@ -76,6 +88,7 @@ const Toggle = styled.div`
 `
 
 const AContent = a(Content)
+const AToggle = a(Toggle)
 
 export const Editor = ({ onChange }: TEditorProps) => {
   const [value, setValue] = useState<string | undefined>()
@@ -119,13 +132,22 @@ export const Editor = ({ onChange }: TEditorProps) => {
           }}
         />
       </AContent>
-      <Toggle
+      <AToggle
+        $active={editorOpen}
         onClick={() => {
           setEditorOpen((s) => !s)
         }}
+        style={{
+          y: editorVisible.to((p) => {
+            // bounce on y axis
+
+            const t = Math.sin(p * Math.PI)
+            return lerp(0, -16, t)
+          }),
+        }}
       >
         {editorOpen ? 'Done' : 'Edit'}
-      </Toggle>
+      </AToggle>
     </Wrapper>
   )
 }

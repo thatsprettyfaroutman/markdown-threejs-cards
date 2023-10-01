@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { MathUtils, Group } from 'three'
+import { type Vector2, MathUtils, Group } from 'three'
 import { type GroupProps, useFrame, useThree } from '@react-three/fiber'
 import { type SpringValue, to } from 'react-spring'
 import { useCards } from 'hooks/useCards'
@@ -9,10 +9,11 @@ const DEG = Math.PI / 180
 const TEMP_TRANSFORM = [0, 0, 0]
 const { lerp, clamp } = MathUtils
 
-type TCardsProps = GroupProps & {
+type TCardsProps = Omit<GroupProps, 'onClick'> & {
   cards: ReturnType<typeof useCards>['cards']
   currentIndex: SpringValue<number>
   hidden: SpringValue<number>
+  onClick: (index: number, uv: Vector2) => void
 }
 
 export const Cards = ({
@@ -21,6 +22,7 @@ export const Cards = ({
   hidden,
   children,
   rotation,
+  onClick,
   ...restProps
 }: TCardsProps) => {
   const { viewport } = useThree()
@@ -62,7 +64,17 @@ export const Cards = ({
         })
 
         return (
-          <Card key={i} position={position} rotation={rotation} card={card} />
+          <Card
+            key={i}
+            position={position}
+            rotation={rotation}
+            card={card}
+            onClick={(e) => {
+              e.stopPropagation()
+              // @ts-ignore type mismatch, e.uv exists
+              onClick(i, e.uv)
+            }}
+          />
         )
       })}
     </group>

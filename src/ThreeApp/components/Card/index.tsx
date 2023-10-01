@@ -50,7 +50,7 @@ export const Card = ({ card, ...restProps }: TCardProps) => {
   const { viewport } = useThree()
   const scale = Math.min(
     // Fit horizontally
-    viewport.width - 192 * px,
+    viewport.width - 64 * px,
 
     // Fit vertically
     viewport.height - 256 * px,
