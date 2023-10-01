@@ -1,14 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
-import { useDebounce, useMediaQuery } from '@uidotdev/usehooks'
+import { useDebounce } from '@uidotdev/usehooks'
 import chroma from 'chroma-js'
-import { a, useSpring } from 'react-spring'
 import { Leva, useControls } from 'leva'
-import { MEDIA } from 'styles/media'
 import { ThreeApp } from 'ThreeApp'
 import { Editor } from 'components/Editor'
-
-// TODO: mobile layout
 
 const GlobalStyle = createGlobalStyle<{ bg: string }>`
   html, body {

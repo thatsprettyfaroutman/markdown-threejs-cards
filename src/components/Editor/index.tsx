@@ -1,4 +1,4 @@
-import { type Dispatch, type SetStateAction, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { useMediaQuery } from '@uidotdev/usehooks'
 import lerp from 'lerp'
@@ -13,16 +13,23 @@ const Wrapper = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  width: 400px;
-  height: 100%;
+  height: 100vh;
 `
 
 const Content = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 100vw;
   height: 100%;
+  max-width: 400px;
+  transition: background-color 0.2s ease-out;
+  background-color: #0008;
+  backdrop-filter: blur(16px);
+
+  @media ${MEDIA.tablet} {
+    background-color: transparent;
+  }
 `
 
 const TextArea = styled.textarea`
@@ -34,12 +41,37 @@ const TextArea = styled.textarea`
   box-sizing: border-box;
   border: none;
   padding: 32px;
+  padding-bottom: 128px;
   background: transparent;
   color: #fff;
+  resize: none;
 
   &:focus,
   &:active {
     outline: none;
+  }
+`
+
+const Toggle = styled.div`
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  aspect-ratio: 0.714286;
+  min-width: 64px;
+  border: 2px solid #f8afac;
+  background-color: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #f8afac;
+  cursor: pointer;
+  user-select: none;
+
+  @media ${MEDIA.tablet} {
+    display: none;
   }
 `
 
@@ -49,7 +81,6 @@ export const Editor = ({ onChange }: TEditorProps) => {
   const [value, setValue] = useState<string | undefined>()
   const [loading, setLoading] = useState(true)
 
-  // TODO: set editor open!
   const [editorOpen, setEditorOpen] = useState(false)
   const phone = !useMediaQuery(MEDIA.tablet)
   const { editorVisible } = useSpring({
@@ -76,7 +107,9 @@ export const Editor = ({ onChange }: TEditorProps) => {
     <Wrapper>
       <AContent
         style={{
-          x: editorVisible.to((p) => lerp(-400, 0, p)),
+          x: editorVisible.to((p) => {
+            return lerp(-400, 0, p)
+          }),
         }}
       >
         <TextArea
@@ -86,6 +119,13 @@ export const Editor = ({ onChange }: TEditorProps) => {
           }}
         />
       </AContent>
+      <Toggle
+        onClick={() => {
+          setEditorOpen((s) => !s)
+        }}
+      >
+        {editorOpen ? 'Done' : 'Edit'}
+      </Toggle>
     </Wrapper>
   )
 }
