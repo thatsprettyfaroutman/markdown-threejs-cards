@@ -48,7 +48,16 @@ export const Card = ({ card, ...restProps }: TCardProps) => {
   const width = modelSize.z
   const height = modelSize.y
   const { viewport } = useThree()
-  const scale = Math.min(viewport.height - 256 * px, (640 * px) / height)
+  const scale = Math.min(
+    // Fit horizontally
+    viewport.width - 192 * px,
+
+    // Fit vertically
+    viewport.height - 256 * px,
+
+    // Make sure cards are not taller than 640px
+    (640 * px) / height
+  )
 
   const metalnessRoughnessMap = useTexture(METALNESS_ROUGHNESS_TEXTURE_PATH)
   metalnessRoughnessMap.minFilter = NearestFilter

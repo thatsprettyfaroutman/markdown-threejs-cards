@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
-import { useDebounce } from '@uidotdev/usehooks'
-import { ThreeApp } from 'ThreeApp'
+import { useDebounce, useMediaQuery } from '@uidotdev/usehooks'
 import chroma from 'chroma-js'
+import { a, useSpring } from 'react-spring'
 import { Leva, useControls } from 'leva'
+import { MEDIA } from 'styles/media'
+import { ThreeApp } from 'ThreeApp'
+import { Editor } from 'components/Editor'
 
 // TODO: mobile layout
 
@@ -20,24 +23,6 @@ const GlobalStyle = createGlobalStyle<{ bg: string }>`
 
 const StyledApp = styled.div`
   position: relative;
-
-  > textarea {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 400px;
-    height: 100%;
-    box-sizing: border-box;
-    border: none;
-    padding: 32px;
-    background: transparent;
-    color: #fff;
-
-    &:focus,
-    &:active {
-      outline: none;
-    }
-  }
 `
 
 const ErrorMessage = styled.div`
@@ -66,22 +51,9 @@ export const App = (props) => {
   const bg = chroma('#110825').darken(bgDarken).css()
   const levaBg = chroma(bg).brighten(0.2).css()
 
-  const [mdLoading, setMdLoading] = useState(true)
   const [md, setMd] = useState<string | undefined>()
   const [errored, setErrored] = useState(false)
-
-  useEffect(() => {
-    const updateInitialMd = async () => {
-      const res = await fetch('/content.md')
-      const text = await res.text()
-      setMdLoading(false)
-      setMd(text)
-    }
-    updateInitialMd()
-  }, [])
-
   const debouncedMd = useDebounce(md, 1000)
-
   const editing = md !== debouncedMd
 
   return (
@@ -95,12 +67,8 @@ export const App = (props) => {
             setErrored(true)
           }}
         />
-        <textarea
-          value={mdLoading ? 'loading' : md}
-          onChange={(e) => {
-            setMd(e.target.value)
-          }}
-        />
+
+        <Editor onChange={(value) => setMd(value)} />
 
         {errored && (
           <ErrorMessage>
