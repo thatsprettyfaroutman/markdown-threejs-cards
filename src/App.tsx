@@ -5,6 +5,8 @@ import { ThreeApp } from 'ThreeApp'
 import chroma from 'chroma-js'
 import { Leva, useControls } from 'leva'
 
+// TODO: mobile layout
+
 const GlobalStyle = createGlobalStyle<{ bg: string }>`
   html, body {
     margin: 0;

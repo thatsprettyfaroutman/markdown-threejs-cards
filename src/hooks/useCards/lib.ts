@@ -10,7 +10,7 @@ export const loadImage = async (src: string) => {
 export const loadFonts = (self: Pick<Window & typeof globalThis, 'fonts'>) => {
   const headingFont = new FontFace(
     'Heading Font',
-    "url(https://fonts.gstatic.com/s/montserrat/v25/JTUSjIg1_i6t8kCHKm459WlhyyTh89Y.woff2) format('woff2')",
+    "url(/font/montserrat-700.woff2) format('woff2')",
     {
       weight: '700',
     }
@@ -19,7 +19,7 @@ export const loadFonts = (self: Pick<Window & typeof globalThis, 'fonts'>) => {
 
   const bodyFont = new FontFace(
     'Body Font',
-    "url(https://fonts.gstatic.com/s/montserrat/v25/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Hw5aXp-p7K4KLg.woff2) format('woff2')",
+    "url(/font/montserrat-400.woff2) format('woff2')",
     {
       weight: '400',
     }
