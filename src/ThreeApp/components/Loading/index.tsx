@@ -12,9 +12,9 @@ const DEG = Math.PI / 180
 const NORMAL_TEXTURE_PATH = '/texture/paper-normal.jpg'
 const ITEMS = [...new Array(4).keys()]
 
-type TSpinnerProps = { visible?: boolean }
+type TLoadingProps = { visible?: boolean }
 
-export const Spinner = ({ visible = true, ...restProps }: TSpinnerProps) => {
+export const Loading = ({ visible = true, ...restProps }: TLoadingProps) => {
   const ref = useRef<Object3D>()
   const px = usePx()
   const normalMap = useTexture(NORMAL_TEXTURE_PATH)

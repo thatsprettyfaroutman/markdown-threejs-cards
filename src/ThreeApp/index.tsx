@@ -9,7 +9,7 @@ import { useCards } from 'hooks/useCards'
 import { Lighting } from 'ThreeApp/components/Lighting'
 import { Camera } from 'ThreeApp/components/Camera'
 import { Cards } from 'ThreeApp/components/Cards'
-import { Spinner } from 'ThreeApp/components/Spinner'
+import { Loading } from 'ThreeApp/components/Loading'
 
 const DEG = Math.PI / 180
 const DPR = Math.min(2, window.devicePixelRatio || 0)
@@ -25,6 +25,7 @@ const StyledThree = styled.div`
   position: relative;
   user-select: none;
   touch-action: none;
+  height: 100vh;
 `
 
 export const ThreeApp = ({
@@ -69,12 +70,12 @@ export const ThreeApp = ({
 
   return (
     <StyledThree {...restProps}>
-      <Canvas dpr={DPR} style={{ height: '100vh' }} shadows linear>
+      <Canvas dpr={DPR} shadows linear>
         {/* @ts-ignore */}
         <Camera />
         <Lighting />
         <Cards rotation={[-10 * DEG, -10 * DEG, 0]} {...cardsProps} />
-        <Spinner visible={editing || processing} />
+        <Loading visible={editing || processing} />
         <mesh
           position-z={-40}
           onClick={() => {

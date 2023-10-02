@@ -53,6 +53,10 @@ const TextArea = styled.textarea`
   &:active {
     outline: none;
   }
+
+  @media ${MEDIA.tablet} {
+    padding-bottom: 32px;
+  }
 `
 
 const Toggle = styled.div<{ $active: boolean }>`
