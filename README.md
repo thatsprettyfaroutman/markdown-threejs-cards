@@ -1,4 +1,6 @@
-# Demo of rendering markdown content on 3d cards, using React-three-fiber, Offscreen Canvas and webworkers.
+# MD to 3D Cards
+
+Demo of rendering Markdown content on 3D cards using React-three-fiber, Offscreen Canvas, and Web Workers.
 
 [Live demo](https://3dmd.netlify.app)
 
