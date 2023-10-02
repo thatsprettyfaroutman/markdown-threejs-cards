@@ -4,10 +4,8 @@ Demo of rendering Markdown content on 3D cards using React-three-fiber, Offscree
 
 [Live demo](https://3dmd.netlify.app)
 
-[![3dmd-demo-short_2_1](https://github.com/thatsprettyfaroutman/markdown-threejs-cards/assets/6589190/a28a29a4-a230-40df-a368-0a031ddd05cf)
-](https://3dmd.netlify.app)
+[![3dmd-demo-short_2_1](https://github.com/thatsprettyfaroutman/markdown-threejs-cards/assets/6589190/7e89ca21-b644-4754-9ff8-dce7d0783ed4)](https://3dmd.netlify.app)
 
 ### Demo video
-
-https://github.com/thatsprettyfaroutman/markdown-threejs-cards/assets/6589190/bbc0aa33-7444-463b-b807-f18f37efa339
+https://github.com/thatsprettyfaroutman/markdown-threejs-cards/assets/6589190/369c1f1d-e3b1-4879-97f6-8b50f0c23d67
 
