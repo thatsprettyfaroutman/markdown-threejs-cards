@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { type Vector2 } from 'three'
 import { Canvas } from '@react-three/fiber'
-// import { EffectComposer, Noise } from '@react-three/postprocessing'
+import { EffectComposer, Noise } from '@react-three/postprocessing'
 import { MeshDiscardMaterial } from '@react-three/drei'
 import styled from 'styled-components'
 import { useSpringValue } from 'react-spring'
@@ -87,9 +87,9 @@ export const ThreeApp = ({
           <planeBufferGeometry args={[100, 100]} />
           <MeshDiscardMaterial />
         </mesh>
-        {/* <EffectComposer>
+        <EffectComposer>
           <Noise opacity={0.025} />
-        </EffectComposer> */}
+        </EffectComposer>
       </Canvas>
     </StyledThree>
   )
