@@ -69,6 +69,7 @@ export const Lighting = ({
         penumbra={0.1}
         attenuation={4.5}
         castShadow
+        shadow-bias={-0.0001}
         {...restProps}
       />
       <Glow color={chroma(ambientColor).brighten(0.5).hex()} />
