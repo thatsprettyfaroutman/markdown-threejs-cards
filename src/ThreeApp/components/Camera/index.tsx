@@ -23,7 +23,6 @@ export const Camera = () => {
     <PerspectiveCamera
       makeDefault
       position={[0, 0, 4]}
-      // @ts-ignore
       fov={25}
       onUpdate={updateCameraOffset}
     />

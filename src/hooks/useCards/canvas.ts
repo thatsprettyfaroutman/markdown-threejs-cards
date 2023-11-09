@@ -13,7 +13,7 @@ export const drawCanvas = (
   const canvas = (overrideCanvas || document.createElement('canvas')) as
     | HTMLCanvasElement
     | OffscreenCanvas
-  // @ts-ignore
+
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
   ctx.save()
   drawFn(ctx)

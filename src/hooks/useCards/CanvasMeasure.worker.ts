@@ -25,11 +25,11 @@ export const api = {
     // eslint-disable-next-line
     await loadFonts(self)
 
-    // @ts-ignore
     const canvas = new OffscreenCanvas(
       contentPropsParam.canvasStyle.width,
       contentPropsParam.canvasStyle.height
     ) as OffscreenCanvas
+
     const contentProps = { ...contentPropsParam, canvas }
 
     // Compute card measurements

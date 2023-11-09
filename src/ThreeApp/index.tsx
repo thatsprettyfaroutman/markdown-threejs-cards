@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { type Vector2 } from 'three'
 import { Canvas } from '@react-three/fiber'
-import { EffectComposer, Noise } from '@react-three/postprocessing'
 import { MeshDiscardMaterial } from '@react-three/drei'
 import styled from 'styled-components'
 import { useSpringValue } from 'react-spring'
@@ -71,11 +70,12 @@ export const ThreeApp = ({
   return (
     <StyledThree {...restProps}>
       <Canvas dpr={DPR} shadows linear>
-        {/* @ts-ignore */}
         <Camera />
         <Lighting />
-        <Cards rotation={[-10 * DEG, -10 * DEG, 0]} {...cardsProps} />
         <Loading visible={editing || processing} />
+        <Cards rotation={[-10 * DEG, -10 * DEG, 0]} {...cardsProps} />
+
+        {/* Reset plane */}
         <mesh
           position-z={-40}
           onClick={() => {
@@ -87,9 +87,6 @@ export const ThreeApp = ({
           <planeBufferGeometry args={[100, 100]} />
           <MeshDiscardMaterial />
         </mesh>
-        <EffectComposer>
-          <Noise opacity={0.025} />
-        </EffectComposer>
       </Canvas>
     </StyledThree>
   )

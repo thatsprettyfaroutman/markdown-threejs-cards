@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { type Object3D, MathUtils } from 'three'
+import { type Group, type Mesh, MathUtils } from 'three'
 import { a, easings } from '@react-spring/three'
 import { useTexture } from '@react-three/drei'
 import { usePx } from 'hooks/usePx'
@@ -15,7 +15,7 @@ const ITEMS = [...new Array(4).keys()]
 type TLoadingProps = { visible?: boolean }
 
 export const Loading = ({ visible = true, ...restProps }: TLoadingProps) => {
-  const ref = useRef<Object3D>()
+  const ref = useRef<Group>()
   const px = usePx()
   const normalMap = useTexture(NORMAL_TEXTURE_PATH)
 
@@ -31,6 +31,7 @@ export const Loading = ({ visible = true, ...restProps }: TLoadingProps) => {
     }
 
     if (visibleSpring.get() < 0.001) {
+      // Don't animate when invisible
       return
     }
 
@@ -38,7 +39,7 @@ export const Loading = ({ visible = true, ...restProps }: TLoadingProps) => {
     const currentIndex = 1 - ((t * 1.5) % 1)
 
     for (let i = 0; i < ITEMS.length; i++) {
-      const item = group.children[i]
+      const item = group.children[i] as Mesh
       if (!item) {
         continue
       }
@@ -53,22 +54,24 @@ export const Loading = ({ visible = true, ...restProps }: TLoadingProps) => {
       item.position.z = moving * -0.5
       item.position.y = moving * -0.125
       item.rotation.z = entering * 0.5
-      item.material.opacity = leaving * Math.min(1, (1 - entering) * 2)
+
+      const material = Array.isArray(item.material)
+        ? item.material[0]
+        : item.material
+
+      if (material) {
+        material.opacity = leaving * Math.min(1, (1 - entering) * 2)
+      }
     }
   })
 
   return (
-    // @ts-ignore
     <a.group
-      // @ts-ignore
       ref={ref}
-      // @ts-ignore
       scale={80 * px}
-      // @ts-ignore
       {...restProps}
       rotation-x={-22.5 * DEG}
       rotation-y={-22.5 * DEG}
-      // @ts-ignore
       position-z={visibleSpring.to((p) => lerp(-10, 0, p))}
     >
       {ITEMS.map((i) => (

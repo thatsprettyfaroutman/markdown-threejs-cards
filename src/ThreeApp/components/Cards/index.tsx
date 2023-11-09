@@ -5,8 +5,9 @@ import { type SpringValue, to } from 'react-spring'
 import { useCards } from 'hooks/useCards'
 import { Card } from 'ThreeApp/components/Card'
 
+// TEMP_TRANSFORM is reused to avoid creating a new array on every render
+const TEMP_TRANSFORM = [0, 0, 0] as [x: number, y: number, z: number]
 const DEG = Math.PI / 180
-const TEMP_TRANSFORM = [0, 0, 0]
 const { lerp, clamp } = MathUtils
 
 type TCardsProps = Omit<GroupProps, 'onClick'> & {
@@ -67,11 +68,10 @@ export const Cards = ({
           <Card
             key={i}
             position={position}
-            rotation={rotation}
+            rotation={rotation as unknown as typeof TEMP_TRANSFORM}
             card={card}
             onClick={(e) => {
               e.stopPropagation()
-              // @ts-ignore type mismatch, e.uv exists
               onClick(i, e.uv)
             }}
           />

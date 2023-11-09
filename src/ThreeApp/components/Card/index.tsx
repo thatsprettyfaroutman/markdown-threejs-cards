@@ -1,8 +1,15 @@
 import { useRef } from 'react'
-import { type Geometry, NearestFilter, Vector2, Vector3, Group } from 'three'
+import {
+  type BufferGeometry,
+  type Texture,
+  NearestFilter,
+  Vector2,
+  Vector3,
+  Group,
+} from 'three'
 import { type GroupProps, useFrame, useThree } from '@react-three/fiber'
 import { useTexture, useGLTF, MeshDiscardMaterial } from '@react-three/drei'
-import { a } from '@react-spring/three'
+import { a, AnimatedProps } from '@react-spring/three'
 import { useControls } from 'leva'
 import { usePx } from 'hooks/usePx'
 
@@ -16,17 +23,23 @@ const MODEL_TRANSFORMS = {
   'scale-x': -0.25,
 }
 
-type TCardProps = GroupProps & {
-  card: any
+type TCardProps = AnimatedProps<GroupProps> & {
+  card: {
+    textureMap?: {
+      diffuse?: Texture
+      specularColor?: Texture
+      normal?: Texture
+    }
+  }
 }
 
 type TModelGltf = {
   nodes: {
     Cube002: {
-      geometry: Geometry
+      geometry: BufferGeometry
     }
     Cube002_1: {
-      geometry: Geometry
+      geometry: BufferGeometry
     }
   }
 }
@@ -42,8 +55,7 @@ export const Card = ({ card, ...restProps }: TCardProps) => {
     bumpScale: { value: 0.001, min: -0.001, max: 0.001 },
   })
   const px = usePx()
-  // @ts-ignore mismatching types
-  const { nodes } = useGLTF(MODEL_PATH) as TModelGltf
+  const { nodes } = useGLTF(MODEL_PATH) as unknown as TModelGltf
   const modelSize = nodes.Cube002.geometry.boundingBox.getSize(TEMP_3) || TEMP_3
   const width = modelSize.z
   const height = modelSize.y
@@ -55,7 +67,7 @@ export const Card = ({ card, ...restProps }: TCardProps) => {
     // Fit vertically
     viewport.height - 256 * px,
 
-    // Make sure cards are not taller than 640px
+    // Make sure cards are no taller than 640px
     (640 * px) / height
   )
 
@@ -89,20 +101,17 @@ export const Card = ({ card, ...restProps }: TCardProps) => {
   })
 
   return (
-    // @ts-ignore
     <a.group {...restProps} dispose={null}>
       <group scale={scale}>
         <mesh
-          // rotation-x={-90 * DEG}
           onPointerMove={(e) => {
-            pointerRef.current =
-              // @ts-ignore
-              e.point.clone().sub(e.object.getWorldPosition(ORIGIN))
+            pointerRef.current = (e.point as unknown as Vector2)
+              .clone()
+              .sub(e.object.getWorldPosition(ORIGIN) as unknown as Vector2)
           }}
           onPointerLeave={() => (pointerRef.current = undefined)}
         >
           <planeGeometry args={[width, height]} />
-          {/* <meshBasicMaterial color="#f0f" wireframe /> */}
           <MeshDiscardMaterial />
         </mesh>
 
@@ -115,7 +124,6 @@ export const Card = ({ card, ...restProps }: TCardProps) => {
                 roughnessMap={metalnessRoughnessMap}
                 specularColorMap={card?.textureMap?.specularColor}
                 bumpMap={card?.textureMap?.normal}
-                // side={DoubleSide}
                 {...levaProps}
               />
             </mesh>
