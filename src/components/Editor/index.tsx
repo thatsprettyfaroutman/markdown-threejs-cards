@@ -94,7 +94,7 @@ const Toggle = styled.div<{ $active: boolean }>`
 const AContent = a(Content)
 const AToggle = a(Toggle)
 
-export const Editor = ({ onChange }: TEditorProps) => {
+export default function Editor({ onChange }: TEditorProps) {
   const [value, setValue] = useState<string | undefined>()
   const [loading, setLoading] = useState(true)
 

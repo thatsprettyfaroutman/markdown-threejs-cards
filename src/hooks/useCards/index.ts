@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { CanvasTexture } from 'three'
 import { canvasMeasureApi } from './workers'
+import { useDebounce } from '@uidotdev/usehooks'
 
 const CANVAS_STYLE = {
+  dpr: 2,
   width: 300,
   height: 420,
   gap: 24,
@@ -34,39 +36,49 @@ const prepareCardsForThree = (
   return cards
 }
 
-export const useCards = (md?: string) => {
+type TCards = ReturnType<typeof prepareCardsForThree>
+
+export const useCards = (markdown?: string) => {
   const [errored, setErrored] = useState(false)
   const [processing, setProcessing] = useState(false)
-  const [cards, setCards] = useState<ReturnType<typeof prepareCardsForThree>>(
-    []
-  )
+  const [cards, setCards] = useState<TCards>([])
+  const debouncedProcessing = useDebounce(processing, 500)
 
   useEffect(() => {
     let mounted = true
     setProcessing(true)
-    ;(async () => {
-      try {
-        const content = await canvasMeasureApi.processContent({
-          mdSrc: '/content.md',
-          md,
-          devicePixelRatio: 2,
-          canvasStyle: CANVAS_STYLE,
-        })
-        if (mounted) {
-          setCards(prepareCardsForThree(content))
-          setProcessing(false)
-        }
-      } catch (error) {
-        console.error(error)
-        if (mounted) {
-          setErrored(true)
-        }
+
+    if (!markdown) {
+      return () => {
+        mounted = false
       }
-    })()
+    }
+
+    const processMarkdown = async (markdown: string) => {
+      const content = await canvasMeasureApi.processContent({
+        md: markdown,
+        canvasStyle: CANVAS_STYLE,
+      })
+      if (mounted) {
+        setCards(prepareCardsForThree(content))
+        setProcessing(false)
+      }
+    }
+
+    try {
+      console.log(markdown)
+      processMarkdown(markdown)
+    } catch (error) {
+      console.error(error)
+      if (mounted) {
+        setErrored(true)
+      }
+    }
+
     return () => {
       mounted = false
     }
-  }, [md])
+  }, [markdown])
 
-  return { cards, processing, errored }
+  return { cards, processing: debouncedProcessing || processing, errored }
 }

@@ -2,10 +2,9 @@ import { type processMd } from './lib'
 import { type measureItem } from './measure'
 
 export type TProcessContentProps = {
-  mdSrc: string
-  md?: string
-  devicePixelRatio: number
+  md: string
   canvasStyle: {
+    dpr: number
     width: number
     height: number
     gap: number

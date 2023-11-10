@@ -6,17 +6,6 @@ import { getMeasuredCards } from './measure'
 
 export default {} as typeof Worker & { new (): Worker }
 
-const getMarkdown = async ({
-  md,
-  mdSrc,
-}: Pick<TProcessContentProps, 'md' | 'mdSrc'>) => {
-  if (md) {
-    return md
-  }
-  const res = await fetch(mdSrc)
-  return res.text()
-}
-
 // Define API
 export const api = {
   processContent: async (
@@ -35,7 +24,7 @@ export const api = {
     // Compute card measurements
     // -------------------------
 
-    const md = await getMarkdown(contentProps)
+    const { md } = contentProps
     const processedMd = await processMd(md)
     const measuredCards = getMeasuredCards(processedMd, contentProps)
 

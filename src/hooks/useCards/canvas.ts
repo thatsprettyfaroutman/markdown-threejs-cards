@@ -25,8 +25,7 @@ export const scaleContext = (
   ctx: CanvasRenderingContext2D,
   contentProps: TProcessContentProps
 ) => {
-  const { width, height } = contentProps.canvasStyle
-  const dpr = contentProps.devicePixelRatio
+  const { width, height, dpr } = contentProps.canvasStyle
   ctx.canvas.width = width * dpr
   ctx.canvas.height = height * dpr
   // scale the drawing ctx so everything will work at the higher dpr
@@ -77,7 +76,7 @@ const drawImageItem = (
   ctx.save()
   ctx.globalAlpha = opacity
 
-  const dpr = contentProps.devicePixelRatio
+  const { dpr } = contentProps.canvasStyle
   const cx = (ctx.canvas.width / dpr - item.width) * 0.5
   const cy = (ctx.canvas.height / dpr - item.height) * 0.5
 
@@ -153,7 +152,7 @@ export const generateCardTexture = async ({
     contentProps,
     (ctx) => {
       if (backgroundTexture) {
-        const dpr = contentProps.devicePixelRatio
+        const { dpr } = contentProps.canvasStyle
         const { width, height } = ctx.canvas
         const [repeatX, repeatY] = backgroundTextureRepeat
         const w = width / dpr / repeatX

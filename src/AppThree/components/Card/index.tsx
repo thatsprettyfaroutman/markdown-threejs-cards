@@ -48,12 +48,16 @@ useTexture.preload(METALNESS_ROUGHNESS_TEXTURE_PATH)
 useGLTF.preload(MODEL_PATH)
 
 export const Card = ({ card, ...restProps }: TCardProps) => {
-  const levaProps = useControls({
-    roughness: { value: 0.5, min: 0, max: 1 },
-    metalness: { value: 0, min: 0, max: 1 },
-    specularIntensity: { value: 2.6, min: 0, max: 10 },
-    bumpScale: { value: 0.001, min: -0.001, max: 0.001 },
-  })
+  const levaProps = useControls(
+    'Material',
+    {
+      roughness: { value: 0.5, min: 0, max: 1 },
+      metalness: { value: 0, min: 0, max: 1 },
+      specularIntensity: { value: 2.6, min: 0, max: 10 },
+      bumpScale: { value: 0.001, min: -0.001, max: 0.001 },
+    },
+    { collapsed: true }
+  )
   const px = usePx()
   const { nodes } = useGLTF(MODEL_PATH) as unknown as TModelGltf
   const modelSize = nodes.Cube002.geometry.boundingBox.getSize(TEMP_3) || TEMP_3
