@@ -109,8 +109,6 @@ export const Card = ({ card, ...restProps }: TCardProps) => {
       <group scale={scale}>
         <mesh
           onPointerMove={(e) => {
-            // TODO: get rid of @ts-ignore
-            // @ts-ignore point is there.
             pointerRef.current = (e.point as unknown as Vector2)
               .clone()
               .sub(e.object.getWorldPosition(ORIGIN) as unknown as Vector2)
