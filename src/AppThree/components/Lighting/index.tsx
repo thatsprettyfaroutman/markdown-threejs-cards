@@ -62,6 +62,7 @@ export const Lighting = ({
       <ambientLight args={[ambientColor, ambientIntensity]} />
       <SpotLight
         position={[lightX, lightY, -lightZ]}
+        // @ts-ignore
         intensity={lightIntensity}
         angle={lightAngle}
         penumbra={0.1}
