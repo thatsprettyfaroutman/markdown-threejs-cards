@@ -8,6 +8,7 @@ import useApp from './useApp'
 import { useCards } from 'hooks/useCards'
 import { Loading } from 'AppThree/components/Loading'
 import { Cards } from 'AppThree/components/Cards'
+import CvLink from 'components/CvLink'
 
 const Wrapper = styled.div`
   position: relative;
@@ -33,6 +34,8 @@ export default function App(props) {
         <Editor onChange={handleMarkdownChange} />
         {errored && <Error />}
       </Wrapper>
+
+      <CvLink />
 
       {/* Debug tools */}
       <Leva collapsed flat theme={levaTheme} />
