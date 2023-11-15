@@ -13,8 +13,6 @@ import { a, AnimatedProps } from '@react-spring/three'
 import { useControls } from 'leva'
 import { usePx } from 'hooks/usePx'
 
-// TODO: fix @ts-ignores in this file
-
 const MODEL_PATH = '/model/card.gltf'
 const METALNESS_ROUGHNESS_TEXTURE_PATH = '/texture/metalnessRoughness.jpg'
 const TEMP_3 = new Vector3()
@@ -107,15 +105,15 @@ export const Card = ({ card, ...restProps }: TCardProps) => {
   })
 
   return (
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore: https://github.com/pmndrs/react-spring/issues/1515
     <a.group {...restProps} dispose={null}>
       <group scale={scale}>
         <mesh
           onPointerMove={(e) => {
-            // @ts-ignore
+            console.log(e)
             pointerRef.current = (e.point as unknown as Vector2)
               .clone()
-              // @ts-ignore
               .sub(e.object.getWorldPosition(ORIGIN) as unknown as Vector2)
           }}
           onPointerLeave={() => (pointerRef.current = undefined)}
@@ -126,12 +124,7 @@ export const Card = ({ card, ...restProps }: TCardProps) => {
 
         <group ref={cardFacesGroupRef}>
           <group {...MODEL_TRANSFORMS}>
-            <mesh
-              // @ts-ignore
-              castShadow
-              receiveShadow
-              geometry={nodes.Cube002.geometry}
-            >
+            <mesh castShadow receiveShadow geometry={nodes.Cube002.geometry}>
               <meshPhysicalMaterial
                 map={card?.textureMap?.diffuse}
                 metalnessMap={metalnessRoughnessMap}
@@ -142,12 +135,7 @@ export const Card = ({ card, ...restProps }: TCardProps) => {
               />
             </mesh>
 
-            <mesh
-              // @ts-ignore
-              castShadow
-              receiveShadow
-              geometry={nodes.Cube002_1.geometry}
-            >
+            <mesh castShadow receiveShadow geometry={nodes.Cube002_1.geometry}>
               <meshStandardMaterial color="#000" />
             </mesh>
           </group>

@@ -8,8 +8,6 @@ import { MeshDiscardMaterial } from '@react-three/drei'
 import lerp from 'lerp'
 import clamp from 'ramda/src/clamp'
 
-// TODO: fix @ts-ignores in this file
-
 const TEMP_TRANSFORM = [0, 0, 0] as [x: number, y: number, z: number]
 const DEG = Math.PI / 180
 const SPRING_OPTIONS = { config: { precision: 0.0001 } }
@@ -88,15 +86,12 @@ export const Cards = ({
 
         return (
           <Card
-            // @ts-ignore
             key={i}
-            position={position}
+            position={position as unknown as typeof TEMP_TRANSFORM}
             rotation={rotation as unknown as typeof TEMP_TRANSFORM}
             card={card}
             onClick={(e) => {
               e.stopPropagation()
-
-              // @ts-ignore
               handleCardClick(i, e.uv)
             }}
           />
